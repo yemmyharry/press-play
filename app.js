@@ -4,7 +4,7 @@ const app = express()
 const cors = require('cors')
 const mongoose = require('mongoose')
 const userRouter = require('./routes/user')
-const User = require('./models/user')
+// const User = require('./models/user')
 
 // mongoose.connect("mongodb://localhost:27017/pressTest",{ useNewUrlParser: true ,useUnifiedTopology: true })
 // .then(()=>{
@@ -29,9 +29,8 @@ app.use(express.json())
 app.use(cors())
 
 
-app.get('/', async (req,res,next)=>{
-    const users =  await User.find();
-    res.send(users)
+app.get('/', (req,res,next)=>{
+    res.send(`Welcome to Press Play API`)
 })
 
 app.use('/user', userRouter)

@@ -2,10 +2,10 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const User = require('../models/user')
 const _ = require('lodash');
-const mailgun = require("mailgun-js");
-const DOMAIN = "sandboxe471c820dd0449c58c93042c12b237a7.mailgun.org";
-const Mailgen = require('mailgen');
-const mg = mailgun({apiKey: process.env.MAILGUN_APIKEY , domain: DOMAIN});
+// const mailgun = require("mailgun-js");
+// const DOMAIN = "sandboxe471c820dd0449c58c93042c12b237a7.mailgun.org";
+// const Mailgen = require('mailgen');
+// const mg = mailgun({apiKey: process.env.MAILGUN_APIKEY , domain: DOMAIN});
 const {sendPasswordResetMail} = require('../config/mail');
 
 
