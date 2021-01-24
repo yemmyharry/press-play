@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const User = require('../models/user')
+const _ = require('lodash');
 const mailgun = require("mailgun-js");
 const DOMAIN = "sandboxe471c820dd0449c58c93042c12b237a7.mailgun.org";
 
@@ -46,7 +47,8 @@ exports.user_signup = (req, res, next)=>{
                 return res.status(400).json({error: err})
             }
             res.status(200).json({
-                message :"signup success"
+                message :"signup success",
+                extra: newUser
             })
         })
         })
@@ -96,6 +98,74 @@ exports.forgotPassword = (req,res) => {
             console.log("Error or User does not exist")
             res.send("User does not exist")
         }
-        
+        const token =  jwt.sign({_id: user._id}, process.env.RESET_PASSWORD_KEY, {expiresIn: '1h'})
+
+
+        const data = {
+            from: "yemmyharry@gmail.com",
+            to: email,
+            subject: "Reset Password",
+            html: `
+                <h2> Please click to reset your password </h2>
+                <p>  ${process.env.CLIENT_URL}/reset_password/${token}  </p>
+            `
+        };
+
+        return user.updateOne({resetLink: token}, (err, success) => {
+            if(err){
+                return res.status(400).send("Link expired or invalid link")
+            }
+            else {
+                mg.messages().send(data, function (error, body) {
+                    if(error){
+                        return res.json({message: error.message})
+                    }
+                    return res.json({message: "Password reset mail has been sent."})
+                    
+                });
+            }
+        })
+      
+
     })
 }
+
+
+exports.resetPassword = (req, res) => {
+    const {resetLink, newPassword} = req.body
+    if(resetLink){
+        jwt.verify(resetLink, process.env.RESET_PASSWORD_KEY, (err, decodedData) => {
+            if(err){
+                return res.status(401).send("Incorrect or expired token")
+            }
+            User.findOne({resetLink}, (err,user)=>{
+                if(err || !user){
+                    res.status(400).send("User with this token does not exist")
+                }
+                bcrypt.hash(newPassword, 10, (err, hashReset)=>{
+                  const obj = {
+                    password: hashReset,
+                    resetLink: ''
+                }
+                user = _.extend(user, obj)
+                //user is destination while obj is source
+
+                
+                user.save((err, result)=>{
+                    if(err){
+                        return res.status(400).send("Reset password error")
+                    }
+                    else {
+                            return res.json({message: "Your password has been successfully changed."})
+                    }
+                })   
+                })
+               
+            })
+        })
+    }
+    else {
+        res.status(401).send("Authentication Error")
+    }
+}
+
