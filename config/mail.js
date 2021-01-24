@@ -1,3 +1,4 @@
+require('dotenv').config();
 const nodemailer = require('nodemailer');
 
 const Mailgen = require('mailgen');
@@ -7,8 +8,7 @@ const { EMAIL, PASSWORD, APP_URL } = process.env;
 const base = `${APP_URL}`;
 
 const transporter = nodemailer.createTransport({
-  service: 'yahoo',
-  secure: true,
+  service: 'gmail',
   auth: {
     user: EMAIL,
     pass: PASSWORD
@@ -36,14 +36,14 @@ exports.sendPasswordResetMail = async (user) => {
           link: `${base}/user/password-reset?token=${user.token}`
         }
       },
-      outro: 'Do not shared this link with anyone. Except if the person is helping to reset your password'
+      outro: 'Do not share this link with anyone. Except if the person is helping to reset your password'
     }
   };
 
   const mail = mailGenerator.generate(response);
 
   const message = {
-    from: `Press Play <ezehlivinus@yahoo.com>`,
+    from: `Press Play <o.arigbanla@genesystechhub.com>`,
     to: user.email,
     subject: 'Reset your password',
     html: mail

@@ -132,7 +132,7 @@ exports.forgotPassword = (req,res) => {
                 // });
                  sendPasswordResetMail(user);
 
-                 res.status(200).send({message: 'mail has sent to the email address'})
+                 res.status(200).send({message: 'A mail has been sent to your email address.'})
             }
         })
       
