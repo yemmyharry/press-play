@@ -19,8 +19,10 @@
     "express-validator": "^6.9.2",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.20",
+    "mailgen": "^2.0.14",
     "mailgun-js": "^0.22.0",
     "mongoose": "^5.11.13",
+    "nodemailer": "^6.4.17",
     "nodemon": "^2.0.7"
   }
 }

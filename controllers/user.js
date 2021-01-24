@@ -4,8 +4,9 @@ const User = require('../models/user')
 const _ = require('lodash');
 const mailgun = require("mailgun-js");
 const DOMAIN = "sandboxe471c820dd0449c58c93042c12b237a7.mailgun.org";
+const Mailgen = require('mailgen');
 const mg = mailgun({apiKey: process.env.MAILGUN_APIKEY , domain: DOMAIN});
-
+const {sendPasswordResetMail} = require('../config/mail');
 
 
 exports.userSignup = (req, res, next)=>{
@@ -32,30 +33,36 @@ exports.userSignup = (req, res, next)=>{
 }
 
 
- exports.userLogin = (req, res, next) => {
-     const {email, password} = req.body
-
-     User.find({email}).exec((err, user)=>{
-         if(err || !user){
-             res.status(400).send("User does not exist")
-         }
-         bcrypt.compare(password, user[0].password, (err, result)=>{
-             if(err){
-                 res.status(401).send("Invalid password")
-             }
-             if(result){
+exports.userLogin = (req,res,next)=>{
+    User.find({email: req.body.email})
+    .then(user =>{
+        if(user.length < 1){
+            return res.status(401).send({
+                message: "Invalid user"
+            })
+        }
+        bcrypt.compare(req.body.password, user[0].password, (err, result)=>{
+            if (err){
+                return res.status(401).send({
+                    message: message.err
+                })
+            }
+            if(result){
                 const token = jwt.sign({
                     email: user[0].email,
                     userId: user[0]._id
-                }, process.env.SECRET , {expiresIn: '1h'})
-                return res.status(200).send({
-                    message: "Login successfully",
-                    token: token
+                }, 'secret', {
+                    expiresIn: "1h"
                 })
-             }
-         })
-     })
- }
+                return res.status(200).send({
+                    message: 'Authentication/Login successful',
+                    token: token 
+                })
+            }
+        })
+    })
+}
+
 
 
 // exports.activateAccount = (req, res) => {
@@ -100,29 +107,32 @@ exports.forgotPassword = (req,res) => {
         }
         const token =  jwt.sign({_id: user._id}, process.env.RESET_PASSWORD_KEY, {expiresIn: '1h'})
 
-
-        const data = {
-            from: "yemmyharry@gmail.com",
-            to: email,
-            subject: "Reset Password",
-            html: `
-                <h2> Please click to reset your password </h2>
-                <p>  ${process.env.CLIENT_URL}/reset_password/${token}  </p>
-            `
-        };
+        user.token = token
+        // const data = {
+        //     from: "yemmyharry@gmail.com",
+        //     to: email,
+        //     subject: "Reset Password",
+        //     html: `
+        //         <h2> Please click to reset your password </h2>
+        //         <p>  ${process.env.CLIENT_URL}/reset_password/${token}  </p>
+            // `
+        // };
 
         return user.updateOne({resetLink: token}, (err, success) => {
             if(err){
                 return res.status(400).send("Link expired or invalid link")
             }
             else {
-                mg.messages().send(data, function (error, body) {
-                    if(error){
-                        return res.json({message: error.message})
-                    }
-                    return res.json({message: "Password reset mail has been sent."})
+                // mg.messages().send(data, function (error, body) {
+                //     if(error){
+                //         return res.json({message: error.message})
+                //     }
+                //     return res.json({message: "Password reset mail has been sent."})
                     
-                });
+                // });
+                 sendPasswordResetMail(user);
+
+                 res.status(200).send({message: 'mail has sent to the email address'})
             }
         })
       
