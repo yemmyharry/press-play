@@ -65,37 +65,37 @@ exports.userLogin = (req,res,next)=>{
 
 
 
-// exports.activateAccount = (req, res) => {
-//     const {token} = req.body
-//      if(token){
-//         jwt.verify(token, process.env.SECRET, (err, decodedToken)=>{
-//             if(err){
-//                 return res.send("expired link")
-//             }
-//             const {name,email,password} = decodedToken;
+exports.activateAccount = (req, res) => {
+    const {token} = req.body
+     if(token){
+        jwt.verify(token, process.env.SECRET, (err, decodedToken)=>{
+            if(err){
+                return res.send("expired link")
+            }
+            const {name,email,password} = decodedToken;
 
-//             User.findOne({email}).exec((err, user) => {
-//                 if(user){
-//                     return res.status(400).json({error: 'This user already exists'})
-//                 }
-//                         ///you can rewrite this to reset by ffg d method of sending mail but instead of activation make it rest and then  collect the token and use it to change just the password instead of using it to register
-//                 let newUser = new User({ name, email, password})
-//                 newUser.save((err, success) => {
-//                     if(err){
-//                         console.log("error in signup")
-//                         return res.status(400).json({error: err})
-//                     }
-//                     res.status(200).json({
-//                         message :"signup success"
-//                     })
-//                 })
-//                 })
+            User.findOne({email}).exec((err, user) => {
+                if(user){
+                    return res.status(400).json({error: 'This user already exists'})
+                }
+                        ///you can rewrite this to reset by ffg d method of sending mail but instead of activation make it rest and then  collect the token and use it to change just the password instead of using it to register
+                let newUser = new User({ name, email, password})
+                newUser.save((err, success) => {
+                    if(err){
+                        console.log("error in signup")
+                        return res.status(400).json({error: err})
+                    }
+                    res.status(200).json({
+                        message :"signup success"
+                    })
+                })
+                })
   
-//             })}
-//             else {
-//         return res.send("error, something went wrong")
-//     }
-//         }
+            })}
+            else {
+        return res.send("error, something went wrong")
+    }
+        }
   
 exports.forgotPassword = (req,res) => {
     const {email} = req.body
