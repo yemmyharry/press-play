@@ -2,33 +2,91 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const User = require('../models/user')
 const _ = require('lodash');
+
+const nodemailer = require('nodemailer');
+const Mailgen = require('mailgen');
+
+const { EMAIL, PASSWORD, APP_URL } = process.env;
+
+const base = `${APP_URL}`;
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: EMAIL,
+    pass: PASSWORD
+  }
+});
+
+const mailGenerator = new Mailgen({
+  theme: 'default',
+  product: {
+    name: 'Press Play',
+    link: APP_URL
+  }
+});
 // const mailgun = require("mailgun-js");
 // const DOMAIN = "sandboxe471c820dd0449c58c93042c12b237a7.mailgun.org";
 // const Mailgen = require('mailgen');
 // const mg = mailgun({apiKey: process.env.MAILGUN_APIKEY , domain: DOMAIN});
-const {sendPasswordResetMail} = require('../config/mail');
+const {sendPasswordResetMail, sendAccountActivateMail} = require('../config/mail');
 
 
 exports.userSignup = (req, res, next)=>{
-    const { name, email, password} = req.body
+    const { firstName, lastName, email, password} = req.body
 
     User.findOne({email}).exec((err, user) => {
         if(user){
             return res.status(400).json({error: 'This user already exists'})
         }
-        bcrypt.hash(password, 10, (err, hash)=> {
-            let newUser = new User({ name, email, password:hash})
-            newUser.save((err, success) => {
-            if(err){
-                console.log("error in signup")
-                return res.status(400).json({error: err})
-            }
-            res.status(200).json({
-                message :"signup success",
-                extra: newUser
-            })
-        })
-        }) 
+
+       
+        
+        const token = jwt.sign({firstName, lastName, email, password}, process.env.ACCOUNT_ACTIVATE, {expiresIn: "30m"});
+        const response = {
+          body: {
+            name: firstName,
+            intro: 'Account Activate Link',
+            action: {
+              instructions: 'To activate your account, click on the link below:',
+              button: {
+                text: 'Activate Account',
+                link: `${base}/user/activate-account?token=${token}`
+              }
+            },
+            outro: 'Do not share this link with anyone.'
+          }
+        };
+      
+        const mail = mailGenerator.generate(response);
+      
+        const message = {
+          from: `Press Play <o.arigbanla@genesystechhub.com>`,
+          to: email,
+          subject: 'Activate your account',
+          html: mail
+        };
+      
+         transporter.sendMail(message);
+        // return true
+        res.status(200).send({message: 'A mail has been sent to your email address to activate your account.',
+        token: token
+            },
+            )
+
+        // bcrypt.hash(password, 10, (err, hash)=> {
+        //     let newUser = new User({ firstName, lastName, email, password:hash})
+        //     newUser.save((err, success) => {
+        //     if(err){
+        //         console.log("error in signup")
+        //         return res.status(400).json({error: err})
+        //     }
+        //     res.status(200).json({
+        //         message :"signup success",
+        //         extra: newUser
+        //     })
+        // })
+        // }) 
     })
 }
 
@@ -68,27 +126,31 @@ exports.userLogin = (req,res,next)=>{
 exports.activateAccount = (req, res) => {
     const {token} = req.body
      if(token){
-        jwt.verify(token, process.env.SECRET, (err, decodedToken)=>{
+        jwt.verify(token, process.env.ACCOUNT_ACTIVATE, (err, decodedToken)=>{
             if(err){
-                return res.send("expired link")
+                return res.status(404).send("Incorrect or expired link")
             }
-            const {name,email,password} = decodedToken;
+            const { firstName, lastName, email, password} = decodedToken;
 
             User.findOne({email}).exec((err, user) => {
                 if(user){
                     return res.status(400).json({error: 'This user already exists'})
                 }
-                        ///you can rewrite this to reset by ffg d method of sending mail but instead of activation make it rest and then  collect the token and use it to change just the password instead of using it to register
-                let newUser = new User({ name, email, password})
-                newUser.save((err, success) => {
-                    if(err){
-                        console.log("error in signup")
-                        return res.status(400).json({error: err})
-                    }
-                    res.status(200).json({
-                        message :"signup success"
+
+                    bcrypt.hash(password, 10, (err, hash)=> {
+                        let newUser = new User({ firstName, lastName, email, password:hash})
+                        newUser.save((err, success) => {
+                        if(err){
+                            console.log("error in signup")
+                            return res.status(400).json({error: err})
+                        }
+                        res.status(200).json({
+                            message :"signup success",
+                            extra: newUser,
+                            token: token
+                        })
                     })
-                })
+                    }) 
                 })
   
             })}
@@ -123,13 +185,6 @@ exports.forgotPassword = (req,res) => {
                 return res.status(400).send("Link expired or invalid link")
             }
             else {
-                // mg.messages().send(data, function (error, body) {
-                //     if(error){
-                //         return res.json({message: error.message})
-                //     }
-                //     return res.json({message: "Password reset mail has been sent."})
-                    
-                // });
                  sendPasswordResetMail(user);
 
                  res.status(200).send({message: 'A mail has been sent to your email address.'})

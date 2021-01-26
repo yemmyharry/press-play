@@ -1,10 +1,10 @@
 const express = require('express')
 const router = express.Router()
-const {userSignup, userLogin, forgotPassword, resetPassword} = require('../controllers/user')
+const {userSignup, userLogin, forgotPassword, resetPassword, activateAccount} = require('../controllers/user')
 
 router.post('/signup', userSignup)
 
-// router.post('/activate-account', activateAccount)
+router.post('/activate-account', activateAccount)
 
 router.put('/forgot-password', forgotPassword )
 

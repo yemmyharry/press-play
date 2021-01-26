@@ -1,7 +1,7 @@
 require('dotenv').config();
 const nodemailer = require('nodemailer');
-
 const Mailgen = require('mailgen');
+
 
 const { EMAIL, PASSWORD, APP_URL } = process.env;
 
@@ -27,7 +27,7 @@ exports.sendPasswordResetMail = async (user) => {
   // send mail
   const response = {
     body: {
-      name: `Awesome Human`,
+      name: user.firstName,
       intro: 'Password Reset Link',
       action: {
         instructions: 'To reset your password, click on the link below:',
