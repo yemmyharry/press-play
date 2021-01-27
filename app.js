@@ -3,10 +3,15 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const mongoose = require("mongoose");
+require("./config/joiObjectId")()
+
+/* Routes */
 const usersRouter = require("./routes/users");
 const podcastsRouter = require("./routes/podcasts");
 // const User = require('./models/user')
 
+
+/* Database connections */
 // mongoose.connect("mongodb://localhost:27017/pressTest",{ useNewUrlParser: true ,useUnifiedTopology: true })
 // .then(()=>{
 //     console.log('Connected to mongodb')
