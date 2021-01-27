@@ -13,11 +13,12 @@ const userSchema = mongoose.Schema({
         match: /^\S+@\S+\.\S+$/
     
     },
-    password: { type: String, required: true},
+    password: { type: String, required: true, minlength: 7},
     resetLink: {
         data: String,
         default: ''
-    }
+    },
+    isAuthor: false
 })
 
 module.exports = mongoose.model('User', userSchema)

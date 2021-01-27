@@ -2,7 +2,6 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const User = require('../models/user')
 const _ = require('lodash');
-
 const nodemailer = require('nodemailer');
 const Mailgen = require('mailgen');
 
@@ -25,11 +24,8 @@ const mailGenerator = new Mailgen({
     link: APP_URL
   }
 });
-// const mailgun = require("mailgun-js");
-// const DOMAIN = "sandboxe471c820dd0449c58c93042c12b237a7.mailgun.org";
-// const Mailgen = require('mailgen');
-// const mg = mailgun({apiKey: process.env.MAILGUN_APIKEY , domain: DOMAIN});
-const {sendPasswordResetMail, sendAccountActivateMail} = require('../config/mail');
+
+const {sendPasswordResetMail} = require('../config/mail');
 
 
 exports.userSignup = (req, res, next)=>{
@@ -96,13 +92,14 @@ exports.userLogin = (req,res,next)=>{
     .then(user =>{
         if(user.length < 1){
             return res.status(401).send({
-                message: "Invalid user"
+                message: "User does not exist"
             })
         }
         bcrypt.compare(req.body.password, user[0].password, (err, result)=>{
             if (err){
-                return res.status(401).send({
-                    message: message.err
+                return res.status(404).send({
+                    message: message.err,
+                    extra: "Invalid login credentials. Make sure password is not less than 7"
                 })
             }
             if(result){
