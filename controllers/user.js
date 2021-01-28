@@ -1,6 +1,6 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const User = require("../models/user");
+const { User } = require("../models/user");
 const _ = require("lodash");
 const nodemailer = require("nodemailer");
 const Mailgen = require("mailgen");
@@ -32,7 +32,13 @@ exports.userSignup = (req, res, next) => {
 
   User.findOne({ email }).exec((err, user) => {
     if (user) {
-      return res.status(400).json({ status: false, message: "This user already exists", data: null });
+      return res
+        .status(400)
+        .json({
+          status: false,
+          message: "This user already exists",
+          data: null
+        });
     }
 
     const token = jwt.sign(
@@ -89,6 +95,16 @@ exports.userSignup = (req, res, next) => {
   });
 };
 
+exports.getUserFromToken = async (req, res, next) => {
+  const { token } = req.body;
+
+  const {userId} = jwt.verify(token, "secret");
+
+  const user = await User.findById(userId).select("firstName lastName email bio isAuthor")
+  req.user = user;
+  res.send({ status: true, message: null, data: req.user });
+};
+
 exports.userLogin = (req, res, next) => {
   User.findOne({ email: req.body.email }).then((user) => {
     if (!user) {
@@ -128,7 +144,7 @@ exports.userLogin = (req, res, next) => {
 };
 
 exports.activateAccount = (req, res) => {
-  const { token } = req.query;
+  const { token } = req.body;
   if (token) {
     jwt.verify(token, process.env.ACCOUNT_ACTIVATE, (err, decodedToken) => {
       if (err) {
