@@ -13,7 +13,7 @@ const userSchema = mongoose.Schema({
         match: /^\S+@\S+\.\S+$/
     
     },
-    password: { type: String, required: true, minlength: 7},
+    password: { type: String, required: true},
     resetLink: {
         data: String,
         default: ''

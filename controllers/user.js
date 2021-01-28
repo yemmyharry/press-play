@@ -1,3 +1,4 @@
+require('dotenv').config();
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const User = require('../models/user')
@@ -11,9 +12,13 @@ const base = `${APP_URL}`;
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
+  secure: false,
   auth: {
     user: EMAIL,
     pass: PASSWORD
+  },
+  tls: {
+      rejectUnauthorized: false
   }
 });
 
