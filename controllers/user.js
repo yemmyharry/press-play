@@ -104,41 +104,6 @@ exports.userSignup = (req, res, next) => {
   });
 };
 
-exports.userLogin = (req, res, next) => {
-  User.find({ email: req.body.email }).then((user) => {
-    if (user.length < 1) {
-      return res.status(401).send({
-        message: "User does not exist",
-      });
-    }
-    bcrypt.compare(req.body.password, user[0].password, (err, result) => {
-      if (!result) {
-        return res.status(404).send({
-          status: false,
-          message: "Invalid Password.",
-          data: null,
-        });
-      }
-      if (result) {
-        const token = jwt.sign(
-          {
-            email: user[0].email,
-            userId: user[0]._id,
-          },
-          "secret",
-          {
-            expiresIn: "1h",
-          }
-        );
-        return res.status(200).send({
-          status: true,
-          message: "Authentication/Login successful",
-          data: { token },
-        });
-      }
-    });
-  });
-};
 
 exports.getUserFromToken = async (req, res, next) => {
   const { token } = req.body;

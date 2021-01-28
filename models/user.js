@@ -31,7 +31,7 @@ const userSchema = mongoose.Schema(
   },
   { timestamps: true }
 );
-
+ 
 const User = mongoose.model("User", userSchema);
   
  
@@ -48,3 +48,4 @@ function validateUser(user) {
 }
 
 exports.User = User;
+ 
