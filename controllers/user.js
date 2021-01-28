@@ -1,3 +1,4 @@
+require("dotenv").config();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { User } = require("../models/user");
@@ -11,9 +12,13 @@ const base = `${APP_URL}`;
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
+  secure: false,
   auth: {
     user: EMAIL,
     pass: PASSWORD,
+  },
+  tls: {
+    rejectUnauthorized: false,
   },
 });
 
@@ -32,13 +37,11 @@ exports.userSignup = (req, res, next) => {
 
   User.findOne({ email }).exec((err, user) => {
     if (user) {
-      return res
-        .status(400)
-        .json({
-          status: false,
-          message: "This user already exists",
-          data: null
-        });
+      return res.status(400).json({
+        status: false,
+        message: "This user already exists",
+        data: null,
+      });
     }
 
     const token = jwt.sign(
@@ -98,9 +101,11 @@ exports.userSignup = (req, res, next) => {
 exports.getUserFromToken = async (req, res, next) => {
   const { token } = req.body;
 
-  const {userId} = jwt.verify(token, "secret");
+  const { userId } = jwt.verify(token, "secret");
 
-  const user = await User.findById(userId).select("firstName lastName email bio isAuthor")
+  const user = await User.findById(userId).select(
+    "firstName lastName email bio isAuthor"
+  );
   req.user = user;
   res.send({ status: true, message: null, data: req.user });
 };
