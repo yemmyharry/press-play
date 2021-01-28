@@ -1,24 +1,40 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
 
-const userSchema = mongoose.Schema({
+const userSchema = mongoose.Schema(
+  {
     firstName: {
-        type: String
+      type: String,
+      minlength: 2,
+      maxlength: 255,
+      required: true,
     },
     lastName: {
-        type: String
+      type: String,
+      minlength: 2,
+      maxlength: 255,
+      required: true,
     },
-    email:{ 
-        type: String, 
-        required: true,
-        match: /^\S+@\S+\.\S+$/
-    
+    email: {
+      type: String,
+      required: true,
+      match: /^\S+@\S+\.\S+$/,
     },
+<<<<<<< HEAD
     password: { type: String, required: true},
+=======
+    password: { type: String, required: true, minlength: 7 },
+>>>>>>> features-podcastRoute
     resetLink: {
-        data: String,
-        default: ''
+      data: String,
+      default: "",
     },
-    isAuthor: false
-})
+    isAuthor: { type: Boolean, default: false },
+    bio: { type: String, maxlength: 255, default: "" },
+  },
+  { timestamps: true }
+);
 
-module.exports = mongoose.model('User', userSchema)
+const User = mongoose.model("User", userSchema);
+  
+
+exports.User = User;

@@ -18,7 +18,7 @@ const episodeSchema = new mongoose.Schema(
       maxlength: 1024,
     },
     podcastId: mongoose.ObjectId,
-    authorId: mongoose.ObjectId,
+    userId: mongoose.ObjectId,
     audioUrl: String
   },
   { timestamps: true }
@@ -31,7 +31,7 @@ async function validateEpisode(episode) {
     title: Joi.string().min(2).max(255).required(),
     description: Joi.string().min(2).max(1024).required(),
     podcastId: Joi.objectId(),
-    authorId: Joi.objectId(),
+    userId: Joi.objectId(),
     audioUrl: Joi.string().min(2).max(255).required()
   };
   const result = await schema.validateAsync(episode);
