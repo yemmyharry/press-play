@@ -11,8 +11,6 @@ require("express-async-errors");
 /* Routes */
 const usersRouter = require("./routes/users");
 const podcastsRouter = require("./routes/podcasts");
-const authorsRouter = require("./routes/authors");
-// const User = require('./models/user')
 
 
 /* Database connections */
@@ -35,8 +33,8 @@ mongoose.connect("mongodb://localhost:27017/pressPlay",{ useNewUrlParser: true ,
 //   .catch((err) => console.error("Something went wrong", err));
 
 //middlewares
-app.use(upload.any()); 
-app.use(express.urlencoded({extended:false})); 
+// app.use(upload.any()); 
+// app.use(express.urlencoded({extended:false})); 
 app.use(express.json());
 
 //to prevent cors errors
@@ -49,8 +47,6 @@ app.get("/", (req, res, next) => {
 app.use("/api/users", usersRouter);
 
 app.use("/api/podcasts", podcastsRouter);
-
-app.use("/api/authors", authorsRouter);
 
 app.use((req, res, next) => {
   res.status(404).send(new Error());
