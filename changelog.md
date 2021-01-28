@@ -1,4 +1,5 @@
 ## Recent Changes to this branch
+- use lodash to filter and return only firstname, lastname and email user data after account is activated
 - correct user model to include ``isAuthor`` property by default
 - correct the **activate-account** route to collect token from the query not the body 
 - set up cloudinary config file in config folder

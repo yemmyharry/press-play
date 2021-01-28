@@ -144,7 +144,7 @@ exports.activateAccount = (req, res) => {
                         }
                         res.status(200).json({
                             message :"signup success",
-                            extra: newUser,
+                            extra: _.pick(newUser, ["firstName", "lastName", "email"]),
                             token: token
                         })
                     })
