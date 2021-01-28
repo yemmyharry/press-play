@@ -1,29 +1,25 @@
-
-require('dotenv').config();
-const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken')
-const User = require('../models/user')
-const _ = require('lodash');
-const nodemailer = require('nodemailer');
-const Mailgen = require('mailgen');
-
+require("dotenv").config();
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const User = require("../models/user");
+const _ = require("lodash");
+const nodemailer = require("nodemailer");
+const Mailgen = require("mailgen");
 
 const { EMAIL, PASSWORD, APP_URL } = process.env;
 
 const base = `${APP_URL}`;
 
 const transporter = nodemailer.createTransport({
-
-  service: 'gmail',
+  service: "gmail",
   secure: false,
   auth: {
     user: EMAIL,
-    pass: PASSWORD
+    pass: PASSWORD,
   },
   tls: {
-      rejectUnauthorized: false
-  }
-
+    rejectUnauthorized: false,
+  },
 });
 
 const mailGenerator = new Mailgen({
@@ -41,114 +37,117 @@ exports.userSignup = (req, res, next) => {
 
   User.findOne({ email }).exec((err, user) => {
     if (user) {
-      return res
-        .status(400)
-        .json({
-          status: false,
-          message: "This user already exists",
-          data: null
-        });
+      return res.status(400).json({
+        status: false,
+        message: "This user already exists",
+        data: null,
+      });
     }
 
-    User.findOne({email}).exec((err, user) => {
-        if(user){
-            return res.status(400).json({error: 'This user already exists'})
-        }
-        
-        const token = jwt.sign({firstName, lastName, email, password}, process.env.ACCOUNT_ACTIVATE, {expiresIn: "30m"});
-        const response = {
-          body: {
-            name: firstName,
-            intro: 'Account Activate Link',
-            action: {
-              instructions: 'To activate your account, click on the link below:',
-              button: {
-                text: 'Activate Account',
-                link: `${base}/user/activate-account?token=${token}`
-              }
+    User.findOne({ email }).exec((err, user) => {
+      if (user) {
+        return res.status(400).json({ error: "This user already exists" });
+      }
+
+      const token = jwt.sign(
+        { firstName, lastName, email, password },
+        process.env.ACCOUNT_ACTIVATE,
+        { expiresIn: "30m" }
+      );
+      const response = {
+        body: {
+          name: firstName,
+          intro: "Account Activate Link",
+          action: {
+            instructions: "To activate your account, click on the link below:",
+            button: {
+              text: "Activate Account",
+              link: `${base}/user/activate-account?token=${token}`,
             },
-            outro: 'Do not share this link with anyone.'
+          },
+          outro: "Do not share this link with anyone.",
+        },
+      };
+
+      const mail = mailGenerator.generate(response);
+
+      const message = {
+        from: `Press Play <o.arigbanla@genesystechhub.com>`,
+        to: email,
+        subject: "Activate your account",
+        html: mail,
+      };
+
+      transporter.sendMail(message);
+      // return true
+      res.status(200).send({
+        status: true,
+        message:
+          "A mail has been sent to your email address to activate your account.",
+        data: { token },
+      });
+
+      // bcrypt.hash(password, 10, (err, hash)=> {
+      //     let newUser = new User({ firstName, lastName, email, password:hash})
+      //     newUser.save((err, success) => {
+      //     if(err){
+      //         console.log("error in signup")
+      //         return res.status(400).json({error: err})
+      //     }
+      //     res.status(200).json({
+      //         message :"signup success",
+      //         extra: newUser
+      //     })
+      // })
+      // })
+    });
+  });
+};
+
+exports.userLogin = (req, res, next) => {
+  User.find({ email: req.body.email }).then((user) => {
+    if (user.length < 1) {
+      return res.status(401).send({
+        message: "User does not exist",
+      });
+    }
+    bcrypt.compare(req.body.password, user[0].password, (err, result) => {
+      if (!result) {
+        return res.status(404).send({
+          status: false,
+          message: "Invalid Password.",
+          data: null,
+        });
+      }
+      if (result) {
+        const token = jwt.sign(
+          {
+            email: user[0].email,
+            userId: user[0]._id,
+          },
+          "secret",
+          {
+            expiresIn: "1h",
           }
-        };
-      
-        const mail = mailGenerator.generate(response);
-      
-        const message = {
-          from: `Press Play <o.arigbanla@genesystechhub.com>`,
-          to: email,
-          subject: 'Activate your account',
-          html: mail
-        };
-      
-         transporter.sendMail(message);
-        // return true
-        res.status(200).send({
-            status: true,
-            message:
-              "A mail has been sent to your email address to activate your account.",
-            data: { token },
-          });
-        
-
-        // bcrypt.hash(password, 10, (err, hash)=> {
-        //     let newUser = new User({ firstName, lastName, email, password:hash})
-        //     newUser.save((err, success) => {
-        //     if(err){
-        //         console.log("error in signup")
-        //         return res.status(400).json({error: err})
-        //     }
-        //     res.status(200).json({
-        //         message :"signup success",
-        //         extra: newUser
-        //     })
-        // })
-        // }) 
-    })
-}
-
-
-exports.userLogin = (req,res,next)=>{
-    User.find({email: req.body.email})
-    .then(user =>{
-        if(user.length < 1){
-            return res.status(401).send({
-                message: "User does not exist"
-            })
-        }
-        bcrypt.compare(req.body.password, user[0].password, (err, result)=>{
-            if (!result){
-                return res.status(404).send({
-                    status: false,
-                    message:
-                    "Invalid Password.",
-                    data: null,
-                  });
-            }
-            if(result){
-                const token = jwt.sign({
-                    email: user[0].email,
-                    userId: user[0]._id
-                }, 'secret', {
-                    expiresIn: "1h"
-                })
-                return res.status(200).send({
-                    status: true,
-                    message:
-                    "Authentication/Login successful",
-                    data: {token}
-                  });
-            }
-        })
-    })
-}
-
+        );
+        return res.status(200).send({
+          status: true,
+          message: "Authentication/Login successful",
+          data: { token },
+        });
+      }
+    });
+  });
+};
 
 exports.getUserFromToken = async (req, res, next) => {
   const { token } = req.body;
 
-  const {userId} = jwt.verify(token, "secret");
+  const { userId } = jwt.verify(token, "secret");
 
-  const user = await User.findById(userId).select("firstName lastName email bio isAuthor")
+  const user = await User.findById(userId).select(
+    "firstName lastName email bio isAuthor"
+  );
   req.user = user;
   res.send({ status: true, message: null, data: req.user });
 };
