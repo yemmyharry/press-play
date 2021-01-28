@@ -33,8 +33,6 @@ mongoose.connect("mongodb://localhost:27017/pressPlay",{ useNewUrlParser: true ,
 //   .catch((err) => console.error("Something went wrong", err));
 
 //middlewares
-// app.use(upload.any()); 
-// app.use(express.urlencoded({extended:false})); 
 app.use(express.json());
 
 //to prevent cors errors
