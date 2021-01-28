@@ -10,10 +10,10 @@ const {
 } = require("../controllers/user");
 
 const validateBody = require("../middlewares/validateBody");
-const { validateSignUp, validateLogin } = require("../models/user");
+const { validateUser, validateLogin } = require("../models/user");
 
 
-router.post("/signup", validateBody(validateSignUp) , userSignup);
+router.post("/signup", validateBody(validateUser) , userSignup);
 
 router.post("/login", validateBody(validateLogin), userLogin);
 
