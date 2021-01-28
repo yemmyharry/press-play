@@ -6,7 +6,11 @@ const mongoose = require("mongoose");
 require("./config/joiObjectId")()
 const multer = require("multer")
 const upload = multer();
+
+const error = require("./middlewares/error")
+
 require("express-async-errors");
+require("./config/logging")()
 
 /* Routes */
 const usersRouter = require("./routes/users");
@@ -46,9 +50,8 @@ app.use("/api/users", usersRouter);
 
 app.use("/api/podcasts", podcastsRouter);
 
-app.use((req, res, next) => {
-  res.status(404).send(new Error());
-});
+app.use(error);
+  
 
 app.listen(process.env.PORT || 4000, () => {
   console.log("app listening at port 4000");
