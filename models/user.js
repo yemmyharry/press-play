@@ -21,7 +21,7 @@ const userSchema = mongoose.Schema(
     },
     password: { type: String, required: true, minlength: 7 },
     resetLink: {
-      type: String,
+      data: String,
       default: "",
     },
     isAuthor: { type: Boolean, default: false },
@@ -30,4 +30,7 @@ const userSchema = mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("User", userSchema);
+const User = mongoose.model("User", userSchema);
+  
+
+exports.User = User;
