@@ -40,8 +40,6 @@ exports.userSignup = (req, res, next)=>{
         if(user){
             return res.status(400).json({error: 'This user already exists'})
         }
-
-       
         
         const token = jwt.sign({firstName, lastName, email, password}, process.env.ACCOUNT_ACTIVATE, {expiresIn: "30m"});
         const response = {
