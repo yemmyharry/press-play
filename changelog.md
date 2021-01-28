@@ -1,4 +1,5 @@
 ## Recent Changes to this branch
+- add post and get routes for podcast endpoint
 - add a handleUploads middleware
 - Remove author route
 - Edited all responses in user controller to use standard response object with **status**, **message** and **data** properties
