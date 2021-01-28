@@ -1,4 +1,5 @@
 ## Recent Changes to this branch
+- add a handleUploads middleware
 - Remove author route
 - Edited all responses in user controller to use standard response object with **status**, **message** and **data** properties
 - use lodash to filter and return only firstname, lastname and email user data after account is activated
