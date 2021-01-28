@@ -1,5 +1,6 @@
 const Joi = require("joi");
 const mongoose = require("mongoose");
+const { validate } = require("./podcast");
 
 const userSchema = mongoose.Schema(
   {
@@ -18,10 +19,16 @@ const userSchema = mongoose.Schema(
     email: {
       type: String,
       required: true,
+      minlength: 5,
+      maxlength: 255,
       match: /^\S+@\S+\.\S+$/,
-    }, 
-    password: { type: String, required: true, minlength: 7 },
- 
+    },
+    password: {
+      type: String,
+      required: true,
+      minlength: 7,
+    },
+
     resetLink: {
       data: String,
       default: "",
@@ -31,16 +38,25 @@ const userSchema = mongoose.Schema(
   },
   { timestamps: true }
 );
- 
+
 const User = mongoose.model("User", userSchema);
-  
- 
+
 function validateUser(user) {
   const schema = Joi.object({
-    email: Joi.string().min(5).max(255).email(),
-    password: Joi.string().min(2).max(1024).required(),
-    userId: Joi.objectId().required(),
-    coverImageUrl: Joi.string().min(2).max(255).required(),
+    email: Joi.string().min(5).max(255).email().required(),
+    password: Joi.string().min(8).max(255).required(),
+    firstName: Joi.string().min(2).max(255).required(),
+    lastName: Joi.string().min(2).max(255).required(),
+  });
+  const result = schema.validate(user);
+
+  return result;
+}
+
+function validateLogin(user) {
+  const schema = Joi.object({
+    email: Joi.string().min(5).max(255).required().email(),
+    password: Joi.string().required(),
   });
   const result = schema.validate(user);
 
@@ -48,4 +64,7 @@ function validateUser(user) {
 }
 
 exports.User = User;
- 
+
+exports.validateUser = validateUser;
+
+exports.validateLogin = validateLogin;
