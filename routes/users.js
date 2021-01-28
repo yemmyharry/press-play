@@ -9,15 +9,19 @@ const {
   getUserFromToken
 } = require("../controllers/user");
 
-router.post("/signup", userSignup);
+const validateBody = require("../middlewares/validateBody");
+const { validateSignUp, validateLogin } = require("../models/user");
 
-router.post("/activate-account", activateAccount);
+
+router.post("/signup", validateBody(validateSignUp) , userSignup);
+
+router.post("/login", validateBody(validateLogin), userLogin);
+
+router.get("/activate-account", activateAccount);
 
 router.put("/forgot-password", forgotPassword);
 
 router.put("/reset-password", resetPassword);
-
-router.post("/login", userLogin);
 
 router.get("/me", getUserFromToken)
 
