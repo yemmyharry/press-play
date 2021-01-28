@@ -1,12 +1,12 @@
 require("dotenv").config();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const User = require("../models/user");
+const { User } = require("../models/user");
 const _ = require("lodash");
 const nodemailer = require("nodemailer");
 const Mailgen = require("mailgen");
 
-const { EMAIL, PASSWORD, APP_URL } = process.env;
+const { EMAIL, PASSWORD, APP_URL, SECRET, RESET_PASSWORD_KEY, ACCOUNT_ACTIVATE } = process.env;
 
 const base = `${APP_URL}`;
 
@@ -51,7 +51,7 @@ exports.userSignup = (req, res, next) => {
 
       const token = jwt.sign(
         { firstName, lastName, email, password },
-        process.env.ACCOUNT_ACTIVATE,
+        ACCOUNT_ACTIVATE,
         { expiresIn: "30m" }
       );
       const response = {
@@ -62,7 +62,7 @@ exports.userSignup = (req, res, next) => {
             instructions: "To activate your account, click on the link below:",
             button: {
               text: "Activate Account",
-              link: `${base}/user/activate-account?token=${token}`,
+              link: `${base}/api/users/activate-account?token=${token}`,
             },
           },
           outro: "Do not share this link with anyone.",
@@ -108,7 +108,7 @@ exports.userSignup = (req, res, next) => {
 exports.getUserFromToken = async (req, res, next) => {
   const { token } = req.body;
 
-  const { userId } = jwt.verify(token, "secret");
+  const { userId } = jwt.verify(token, SECRET);
 
   const user = await User.findById(userId).select(
     "firstName lastName email bio isAuthor"
@@ -140,7 +140,7 @@ exports.userLogin = (req, res, next) => {
             email: user.email,
             userId: user._id,
           },
-          "secret",
+          SECRET,
           {
             expiresIn: "1h",
           }
@@ -156,9 +156,9 @@ exports.userLogin = (req, res, next) => {
 };
 
 exports.activateAccount = (req, res) => {
-  const { token } = req.body;
+  const { token } = req.query;
   if (token) {
-    jwt.verify(token, process.env.ACCOUNT_ACTIVATE, (err, decodedToken) => {
+    jwt.verify(token, ACCOUNT_ACTIVATE, (err, decodedToken) => {
       if (err) {
         return res.status(404).send("Incorrect or expired link");
       }
@@ -212,7 +212,7 @@ exports.forgotPassword = (req, res) => {
       console.log("Error or User does not exist");
       res.send({ status: false, message: "User does not exist", data: null });
     }
-    const token = jwt.sign({ _id: user._id }, process.env.RESET_PASSWORD_KEY, {
+    const token = jwt.sign({ _id: user._id }, RESET_PASSWORD_KEY, {
       expiresIn: "1h",
     });
 
@@ -223,7 +223,7 @@ exports.forgotPassword = (req, res) => {
     //     subject: "Reset Password",
     //     html: `
     //         <h2> Please click to reset your password </h2>
-    //         <p>  ${process.env.CLIENT_URL}/reset_password/${token}  </p>
+    //         <p>  ${CLIENT_URL}/reset_password/${token}  </p>
     // `
     // };
 
@@ -252,7 +252,7 @@ exports.resetPassword = (req, res) => {
   if (resetLink) {
     jwt.verify(
       resetLink,
-      process.env.RESET_PASSWORD_KEY,
+      RESET_PASSWORD_KEY,
       (err, decodedData) => {
         if (err) {
           return res.status(401).send({
