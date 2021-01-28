@@ -18,12 +18,9 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
       match: /^\S+@\S+\.\S+$/,
-    },
-<<<<<<< HEAD
-    password: { type: String, required: true},
-=======
+    }, 
     password: { type: String, required: true, minlength: 7 },
->>>>>>> features-podcastRoute
+ 
     resetLink: {
       data: String,
       default: "",
