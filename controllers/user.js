@@ -29,6 +29,7 @@ const {sendPasswordResetMail} = require('../config/mail');
 
 
 exports.userSignup = (req, res, next)=>{
+    console.log(req.body)
     const { firstName, lastName, email, password} = req.body
 
     User.findOne({email}).exec((err, user) => {
@@ -47,7 +48,7 @@ exports.userSignup = (req, res, next)=>{
               instructions: 'To activate your account, click on the link below:',
               button: {
                 text: 'Activate Account',
-                link: `${base}/user/activate-account?token=${token}`
+                link: `${base}/api/users/activate-account?token=${token}`
               }
             },
             outro: 'Do not share this link with anyone.'
@@ -121,7 +122,7 @@ exports.userLogin = (req,res,next)=>{
 
 
 exports.activateAccount = (req, res) => {
-    const {token} = req.body
+    const {token} = req.query
      if(token){
         jwt.verify(token, process.env.ACCOUNT_ACTIVATE, (err, decodedToken)=>{
             if(err){

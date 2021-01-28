@@ -1,5 +1,5 @@
 ## Recent Changes to this branch
-
+- correct the **activate-account** route to collect token from the query not the body 
 - set up cloudinary config file in config folder
 - add a few more comments to explain app file better
 - call joi object id validation in the app file so the entire app can acccess it
