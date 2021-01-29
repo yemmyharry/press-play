@@ -6,23 +6,30 @@ const {
   forgotPassword,
   resetPassword,
   activateAccount,
-  getUserFromToken
+  getLoggedInUser,
+  deleteUser
 } = require("../controllers/user");
 
+const checkAuth = require("../middlewares/checkAuth");
+
 const validateBody = require("../middlewares/validateBody");
+const validateObjectId = require("../middlewares/validateObjectId");
 const { validateUser, validateLogin } = require("../models/user");
 
 
+router.get("/me", checkAuth, getLoggedInUser)
+
 router.post("/signup", validateBody(validateUser) , userSignup);
+
+router.get("/activate-account", activateAccount);
+
 
 router.post("/login", validateBody(validateLogin), userLogin);
 
-router.get("/activate-account", activateAccount);
 
 router.put("/forgot-password", forgotPassword);
 
 router.put("/reset-password", resetPassword);
 
-router.get("/me", getUserFromToken)
-
+router.delete("/:id", validateObjectId, deleteUser)
 module.exports = router;
