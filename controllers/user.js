@@ -69,7 +69,7 @@ exports.userSignup = (req, res, next) => {
             instructions: "To activate your account, click on the link below:",
             button: {
               text: "Activate Account",
-              link: `${base}/activateAccount?token=${token}`,
+              link: `${base}/api/users/activate-account?token=${token}`,
             },
           },
           outro: "Do not share this link with anyone.",
@@ -159,7 +159,7 @@ exports.userLogin = (req, res, next) => {
 };
 
 exports.activateAccount = (req, res) => {
-  const { token } = req.query;
+  const { token } = req.body;
   if (token) {
     jwt.verify(token, ACCOUNT_ACTIVATE, (err, decodedToken) => {
       if (err) {
