@@ -1,28 +1,33 @@
 const express = require("express");
-const handleUploads = require("../middlewares/handleUploads");
+const coverImageUpload = require("../middlewares/handleCoverImageUploads");
 const validateObjectId = require("../middlewares/validateObjectId");
 const validateBody = require("../middlewares/validateBody");
 
 const router = express.Router();
-const { validate, Podcast } = require("../models/podcast");
+const {
+  createPodcast,
+  updatePodcast,
+  getAllPodcasts,
+  getEpisodesForPodcast,
+  getPodcast,
+  deletePodcast,
+} = require("../controllers/podcast");
 
-router.get("/", async (req, res) => {
-  let podcasts = await Podcast.find();
-  res.send(podcasts);
-});
+router.get("/", getAllPodcasts);
 
-router.get("/:id", validateObjectId, async (req, res) => {
-  let podcast = await Podcast.findById(req.params.id);
-  if (!podcast) return res.status(404).send({
-    status: false, message: "Invalid Podcast", data: null
-  })
-  res.send(podcast);
-});
+router.get("/:id", validateObjectId, getPodcast);
 
-router.post("/", [handleUploads("coverImage")], async (req, res) => {
-  let podcast = new Podcast(req.body);
-  podcast = await podcast.save();
-  res.send({ status: true, message: null, data: podcast });
-});
- 
+router.get("/:id/episodes", getEpisodesForPodcast);
+
+router.post("/", [coverImageUpload("coverImage")], createPodcast);
+
+router.put(
+  "/:id",
+  validateObjectId,
+  [coverImageUpload("coverImage")],
+  updatePodcast
+);
+
+router.delete("/:id", validateObjectId, deletePodcast);
+
 module.exports = router;
