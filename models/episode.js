@@ -1,5 +1,5 @@
 const Joi = require("joi");
-Joi.objectId = require('joi-objectid')(Joi)
+Joi.objectId = require("joi-objectid")(Joi);
 
 const mongoose = require("mongoose");
 
@@ -18,26 +18,36 @@ const episodeSchema = new mongoose.Schema(
       maxlength: 1024,
     },
     podcastId: mongoose.ObjectId,
-    userId: mongoose.ObjectId,
-    audioUrl: String
+    episodeAudioUrl: { type: String, required: true },
   },
   { timestamps: true }
 );
 
+episodeSchema.statics.lookup = function (title, userId) {
+  return this.findOne({ title: title, userId: userId });
+};
+
+const episodeExists = async function (req) {
+  const episode = await Episode.findOne({
+    title: req.body.title,
+    userId: req.body.userId,
+  });
+  return episode ? true : false;
+};
+
 const Episode = mongoose.model("Episode", episodeSchema);
 
-async function validateEpisode(episode) {
-  const schema = {
+function validateEpisode(episode) {
+  const schema = Joi.object({
     title: Joi.string().min(2).max(255).required(),
     description: Joi.string().min(2).max(1024).required(),
     podcastId: Joi.objectId(),
-    userId: Joi.objectId(),
-    audioUrl: Joi.string().min(2).max(255).required()
-  };
-  const result = await schema.validateAsync(episode);
+  });
+  const result = schema.validate(episode);
 
   return result;
 }
 
 exports.Episode = Episode;
-exports.validate = validateEpisode;
+exports.validateEpisode = validateEpisode;
+exports.episodeExists = episodeExists;

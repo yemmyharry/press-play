@@ -26,11 +26,12 @@ const podcastSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Podcast = mongoose.model("Podcast", podcastSchema);
 
 podcastSchema.statics.lookup = function (title, userId) {
   return this.findOne({ "title": title, "userId": userId });
 };
+
+const Podcast = mongoose.model("Podcast", podcastSchema);
 
 const podcastExists = async function (req) {
   const podcast = await Podcast.findOne({ "title": req.body.title, "userId": req.body.userId });
@@ -52,4 +53,4 @@ function validatePodcast(podcast) {
 
 exports.Podcast = Podcast;
 exports.podcastExists = podcastExists
-exports.validate = validatePodcast;
+exports.validatePodcast = validatePodcast;
