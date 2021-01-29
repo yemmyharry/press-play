@@ -62,7 +62,7 @@ exports.userSignup = (req, res, next) => {
             instructions: "To activate your account, click on the link below:",
             button: {
               text: "Activate Account",
-              link: `${base}/user/activate-account?token=${token}`,
+              link: `${base}/activateAccount?token=${token}`,
             },
           },
           outro: "Do not share this link with anyone.",
