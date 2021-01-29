@@ -20,20 +20,9 @@ router.get("/:id", validateObjectId, async (req, res) => {
 });
 
 router.post("/", [handleUploads("coverImage")], async (req, res) => {
-  const podcastInDB = await Podcast.findOne({
-    title: req.body.title,
-    userId: req.body.userId,
-  });
-  if (podcastInDB)
-    return res.status(400).send({
-      status: false,
-      message: "Podcast already exists",
-      data: null,
-    });
-
   let podcast = new Podcast(req.body);
   podcast = await podcast.save();
   res.send({ status: true, message: null, data: podcast });
 });
-
+ 
 module.exports = router;

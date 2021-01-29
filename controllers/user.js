@@ -1,12 +1,19 @@
 require("dotenv").config();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const User = require("../models/user");
+const { User } = require("../models/user");
 const _ = require("lodash");
 const nodemailer = require("nodemailer");
 const Mailgen = require("mailgen");
 
-const { EMAIL, PASSWORD, APP_URL } = process.env;
+const {
+  EMAIL,
+  PASSWORD,
+  APP_URL,
+  SECRET,
+  RESET_PASSWORD_KEY,
+  ACCOUNT_ACTIVATE,
+} = process.env;
 
 const base = `${APP_URL}`;
 
@@ -51,7 +58,7 @@ exports.userSignup = (req, res, next) => {
 
       const token = jwt.sign(
         { firstName, lastName, email, password },
-        process.env.ACCOUNT_ACTIVATE,
+        ACCOUNT_ACTIVATE,
         { expiresIn: "30m" }
       );
       const response = {
@@ -104,17 +111,20 @@ exports.userSignup = (req, res, next) => {
   });
 };
 
+exports.getLoggedInUser = async (req, res, next) => {
+  const user = await User.findById(req.user.userId);
+  if (!user)
+    return res.status(400).send({
+      status: false,
+      message: "Invalid User",
+      data: null,
+    });
 
-exports.getUserFromToken = async (req, res, next) => {
-  const { token } = req.body;
-
-  const { userId } = jwt.verify(token, "secret");
-
-  const user = await User.findById(userId).select(
-    "firstName lastName email bio isAuthor"
-  );
-  req.user = user;
-  res.send({ status: true, message: null, data: req.user });
+  res.send({
+    status: true,
+    message: null,
+    data: _.pick(user, ["firstName", "lastName", "email", "isAuthor", "bio"]),
+  });
 };
 
 exports.userLogin = (req, res, next) => {
@@ -135,16 +145,9 @@ exports.userLogin = (req, res, next) => {
         });
       }
       if (result) {
-        const token = jwt.sign(
-          {
-            email: user.email,
-            userId: user._id,
-          },
-          "secret",
-          {
-            expiresIn: "1h",
-          }
-        );
+        const token = jwt.sign({ userId: user._id }, SECRET, {
+          expiresIn: "1d",
+        });
         return res.status(200).send({
           status: true,
           message: "Authentication/Login successful",
@@ -156,9 +159,9 @@ exports.userLogin = (req, res, next) => {
 };
 
 exports.activateAccount = (req, res) => {
-  const { token } = req.body;
+  const { token } = req.query;
   if (token) {
-    jwt.verify(token, process.env.ACCOUNT_ACTIVATE, (err, decodedToken) => {
+    jwt.verify(token, ACCOUNT_ACTIVATE, (err, decodedToken) => {
       if (err) {
         return res.status(404).send("Incorrect or expired link");
       }
@@ -212,7 +215,7 @@ exports.forgotPassword = (req, res) => {
       console.log("Error or User does not exist");
       res.send({ status: false, message: "User does not exist", data: null });
     }
-    const token = jwt.sign({ _id: user._id }, process.env.RESET_PASSWORD_KEY, {
+    const token = jwt.sign({ _id: user._id }, RESET_PASSWORD_KEY, {
       expiresIn: "1h",
     });
 
@@ -223,7 +226,7 @@ exports.forgotPassword = (req, res) => {
     //     subject: "Reset Password",
     //     html: `
     //         <h2> Please click to reset your password </h2>
-    //         <p>  ${process.env.CLIENT_URL}/reset_password/${token}  </p>
+    //         <p>  ${CLIENT_URL}/reset_password/${token}  </p>
     // `
     // };
 
@@ -250,52 +253,48 @@ exports.forgotPassword = (req, res) => {
 exports.resetPassword = (req, res) => {
   const { resetLink, newPassword } = req.body;
   if (resetLink) {
-    jwt.verify(
-      resetLink,
-      process.env.RESET_PASSWORD_KEY,
-      (err, decodedData) => {
-        if (err) {
-          return res.status(401).send({
+    jwt.verify(resetLink, RESET_PASSWORD_KEY, (err, decodedData) => {
+      if (err) {
+        return res.status(401).send({
+          status: false,
+          message: "Incorrect or expired token",
+          data: null,
+        });
+      }
+      User.findOne({ resetLink }, (err, user) => {
+        if (err || !user) {
+          res.status(400).send({
             status: false,
-            message: "Incorrect or expired token",
+            message: "User with this token does not exist",
             data: null,
           });
         }
-        User.findOne({ resetLink }, (err, user) => {
-          if (err || !user) {
-            res.status(400).send({
-              status: false,
-              message: "User with this token does not exist",
-              data: null,
-            });
-          }
-          bcrypt.hash(newPassword, 10, (err, hashReset) => {
-            const obj = {
-              password: hashReset,
-              resetLink: "",
-            };
-            user = _.extend(user, obj);
-            //user is destination while obj is source
+        bcrypt.hash(newPassword, 10, (err, hashReset) => {
+          const obj = {
+            password: hashReset,
+            resetLink: "",
+          };
+          user = _.extend(user, obj);
+          //user is destination while obj is source
 
-            user.save((err, result) => {
-              if (err) {
-                return res.status(400).send({
-                  status: false,
-                  message: "Reset password error",
-                  data: null,
-                });
-              } else {
-                return res.json({
-                  status: true,
-                  message: "Your password has been successfully changed.",
-                  data: null,
-                });
-              }
-            });
+          user.save((err, result) => {
+            if (err) {
+              return res.status(400).send({
+                status: false,
+                message: "Reset password error",
+                data: null,
+              });
+            } else {
+              return res.json({
+                status: true,
+                message: "Your password has been successfully changed.",
+                data: null,
+              });
+            }
           });
         });
-      }
-    );
+      });
+    });
   } else {
     res.status(401).send({
       status: true,
@@ -303,4 +302,11 @@ exports.resetPassword = (req, res) => {
       data: null,
     });
   }
+};
+
+exports.deleteUser = async (req, res) => {
+  const user = await User.findByIdAndDelete(req.params.id);
+  if (!user)
+    return res.send({ status: false, message: "Invalid User", data: null });
+  res.send({ status: true, message: null, data: user });
 };
