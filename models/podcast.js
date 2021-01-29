@@ -42,12 +42,13 @@ function validatePodcast(podcast) {
     title: Joi.string().min(2).max(255).required(),
     description: Joi.string().min(2).max(1024).required(),
     userId: Joi.objectId().required(),
-    coverImageUrl: Joi.string().min(2).max(255).required(),
   });
   const result = schema.validate(podcast);
 
   return result;
 }
+
+
 
 exports.Podcast = Podcast;
 exports.podcastExists = podcastExists

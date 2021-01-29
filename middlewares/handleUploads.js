@@ -1,8 +1,8 @@
 const upload = require("../services/uploadService");
 const { coverImageUpload } = require("../utils/cloudinary");
 const _ = require("lodash");
-const validateBody = require("../middlewares/validateBody");
 const { validate, podcastExists } = require("../models/podcast");
+const validateBody = require("../middlewares/validateBody");
 const validateIfExisting = require("./validateIfExisting");
 
 async function uploadFile(req, res, next) {
@@ -15,5 +15,8 @@ async function uploadFile(req, res, next) {
 }
 
 module.exports = (field) => {
-  return [upload.single(field), validateIfExisting(podcastExists, "Podcast"), uploadFile, validateBody(validate)];
+  return [
+    upload.single(field), validateBody(validate), 
+    validateIfExisting(podcastExists, "Podcast"), uploadFile
+  ];
 };
