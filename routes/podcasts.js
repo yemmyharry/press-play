@@ -21,13 +21,8 @@ router.get("/:id/episodes", getEpisodesForPodcast);
 
 router.post("/", [coverImageUpload("coverImage")], createPodcast);
 
-router.put(
-  "/:id",
-  validateObjectId,
-  [coverImageUpload("coverImage")],
-  updatePodcast
-);
+router.put("/:id", validateObjectId,[coverImageUpload("coverImage")],updatePodcast);
 
-router.delete("/:id", validateObjectId, deletePodcast);
+router.delete("/:id",validateObjectId, deletePodcast);
 
 module.exports = router;
