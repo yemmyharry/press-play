@@ -8,7 +8,7 @@ const {
   activateAccount,
   getLoggedInUser,
   deleteUser,
-  updateUser,
+  // updateUser,
 } = require("../controllers/user");
 
 const checkAuth = require("../middlewares/checkAuth");
@@ -29,7 +29,7 @@ router.put("/forgot-password", forgotPassword);
 
 router.put("/reset-password", resetPassword);
 
-router.put("/:id", validateObjectId, updateUser);
+// router.put("/:id", validateObjectId, updateUser);
 
 router.delete("/:id", validateObjectId, deleteUser);
 module.exports = router;
