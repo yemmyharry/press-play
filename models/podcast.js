@@ -31,6 +31,11 @@ const Podcast = mongoose.model("Podcast", podcastSchema);
 podcastSchema.statics.lookup = function (title, userId) {
   return this.findOne({ "title": title, "userId": userId });
 };
+
+const podcastExists = async function (req) {
+  const podcast = await Podcast.findOne({ "title": req.body.title, "userId": req.body.userId });
+  return podcast ? true : false
+}
  
 function validatePodcast(podcast) {
   const schema = Joi.object({
@@ -45,4 +50,5 @@ function validatePodcast(podcast) {
 }
 
 exports.Podcast = Podcast;
+exports.podcastExists = podcastExists
 exports.validate = validatePodcast;
