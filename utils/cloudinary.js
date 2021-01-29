@@ -24,7 +24,7 @@ async function audioUpload (req) {
   const uploadResult = await cloudinary.uploader.upload(req.file.path, {
     resource_type: "video", folder: "press-play/audio", use_filename: true 
   });
-  req.body.audioUrl = uploadResult.secure_url;
+  req.body.episodeAudioUrl = uploadResult.secure_url;
 
 }
 
