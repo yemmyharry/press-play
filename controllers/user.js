@@ -112,7 +112,7 @@ exports.userSignup = (req, res, next) => {
 };
 
 exports.getLoggedInUser = async (req, res, next) => {
-  const user = await User.findById(req.user.userId);
+  const user = await User.findById(req.user.userId).select("-__v -password");
   if (!user)
     return res.status(400).send({
       status: false,
@@ -123,7 +123,7 @@ exports.getLoggedInUser = async (req, res, next) => {
   res.send({
     status: true,
     message: null,
-    data: _.pick(user, ["firstName", "lastName", "email", "isAuthor", "bio"]),
+    data: user,
   });
 };
 
@@ -194,7 +194,12 @@ exports.activateAccount = (req, res) => {
               status: true,
               message: "signup success",
               data: {
-                user: _.pick(newUser, ["firstName", "lastName", "email"]),
+                user: _.pick(newUser, [
+                  "_id",
+                  "firstName",
+                  "lastName",
+                  "email",
+                ]),
                 token,
               },
             });
@@ -203,7 +208,11 @@ exports.activateAccount = (req, res) => {
       });
     });
   } else {
-    return res.send("error, something went wrong");
+    return res.send({
+      status: false,
+      message: "No token provided",
+      data: null,
+    });
   }
 };
 
