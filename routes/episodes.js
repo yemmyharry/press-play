@@ -2,8 +2,16 @@ const express = require("express");
 const audioUpload = require("../middlewares/handleAudioUploads");
 const validateObjectId = require("../middlewares/validateObjectId");
 const validateBody = require("../middlewares/validateBody");
+const validateIfExisting = require("../middlewares/validateIfExisting");
+const { validateEpisode, episodeExists } = require("../models/episode");
 
+const postMiddlewares = [
+  validateBody(validateEpisode),
+  validateIfExisting(episodeExists, "Episode"),
+];
+const putMiddlewares = [validateObjectId, ...postMiddlewares];
 const router = express.Router();
+
 const {
   createEpisode,
   updateEpisode,
@@ -16,9 +24,13 @@ router.get("/", getAllEpisodes);
 
 router.get("/:id", getEpisode);
 
-router.post("/", [audioUpload("episodeAudio")], createEpisode);
+router.post("/", [audioUpload("episodeAudio", postMiddlewares)], createEpisode);
 
-router.put("/:id", [audioUpload("episodeAudio")], updateEpisode);
+router.put(
+  "/:id",
+  [audioUpload("episodeAudio", putMiddlewares)],
+  updateEpisode
+);
 
 router.delete("/:id", deleteEpisode);
 
