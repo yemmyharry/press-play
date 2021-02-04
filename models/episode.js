@@ -37,12 +37,20 @@ const episodeExists = async function (req) {
 
 const Episode = mongoose.model("Episode", episodeSchema);
 
-function validateEpisode(episode) {
-  const schema = Joi.object({
+function validateEpisode(req) {
+  const episode = req.body;
+  let schema = Joi.object({
     title: Joi.string().min(2).max(255).required(),
     description: Joi.string().min(2).max(1024).required(),
     podcastId: Joi.objectId(),
   });
+  if (req.method === "PUT" || req.method === "PATCH") {
+    schema = Joi.object({
+      title: Joi.string().min(2).max(255),
+      description: Joi.string().min(2).max(1024),
+      podcastId: Joi.objectId(),
+    });
+  }
   const result = schema.validate(episode);
 
   return result;

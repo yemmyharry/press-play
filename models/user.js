@@ -40,19 +40,30 @@ const userSchema = mongoose.Schema(
 
 const User = mongoose.model("User", userSchema);
 
-function validateUser(user) {
+function validateUser(req) {
+  let user = req.body;
   const schema = Joi.object({
     email: Joi.string().min(5).max(255).email().required(),
     password: Joi.string().min(8).max(255).required(),
     firstName: Joi.string().min(2).max(255).required(),
     lastName: Joi.string().min(2).max(255).required(),
   });
+
+  if (req.method === "PUT" || req.method === "PATCH") {
+    schema = Joi.object({
+      email: Joi.string().min(5).max(255).email(),
+      password: Joi.string().min(8).max(255),
+      firstName: Joi.string().min(2).max(255),
+      lastName: Joi.string().min(2).max(255),
+    });
+  }
   const result = schema.validate(user);
 
   return result;
 }
 
-function validateLogin(user) {
+function validateLogin(req) {
+  let user = req.body;
   const schema = Joi.object({
     email: Joi.string().min(5).max(255).required().email(),
     password: Joi.string().required(),
