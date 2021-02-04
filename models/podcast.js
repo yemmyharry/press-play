@@ -2,6 +2,7 @@ const Joi = require("joi");
 const mongoose = require("mongoose");
 const { User } = require("../models/user");
 const _ = require("lodash");
+const { formattedDate } = require("../utils/helpers");
 const podcastSchema = new mongoose.Schema(
   {
     title: {
@@ -28,16 +29,31 @@ const podcastSchema = new mongoose.Schema(
 );
 
 podcastSchema.statics.lookup = function (title, userId) {
-  return this.findOne({ title: title, userId: userId });
+  return this.findOne({ title, userId: userId });
 };
 
 podcastSchema.statics.getOnePodcast = async function (podcastId) {
   let podcast = await this.findById(podcastId).lean();
-  let authorId = podcast.authorId || podcast.userId;
-  const author = await User.findById(authorId).select("firstName lastName bio");
+  const author = await User.findById(podcast.userId).select("firstName lastName bio");
+
   podcast.author = author;
+  podcast.date = formattedDate(podcast.createdAt)
 
   return podcast;
+};
+
+podcastSchema.statics.getAllPodcasts = async function () {
+  let podcasts = []
+  for await (let podcast of this.find().lean()) {
+    const author = await User.findById(podcast.userId).select("firstName lastName bio");
+
+    podcast.author = author;
+    podcast.date = formattedDate(podcast.createdAt)
+
+    podcasts.push(podcast)
+  }
+
+  return podcasts;
 };
 
 const Podcast = mongoose.model("Podcast", podcastSchema);
@@ -61,6 +77,8 @@ function validatePodcast(podcast) {
 
   return result;
 }
+
+
 
 exports.Podcast = Podcast;
 exports.podcastExists = podcastExists;
