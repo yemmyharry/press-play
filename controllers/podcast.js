@@ -1,9 +1,9 @@
 const express = require("express");
 const _ = require("lodash");
-
 const router = express.Router();
 const { Podcast } = require("../models/podcast");
 const { Episode } = require("../models/episode");
+const { updateObject } = require("../utils/helpers");
 
 exports.createPodcast = async (req, res) => {
   let podcast = new Podcast(req.body);
@@ -12,6 +12,7 @@ exports.createPodcast = async (req, res) => {
 };
 
 exports.updatePodcast = async (req, res) => {
+  
   let podcast = await Podcast.findByIdAndUpdate(
     req.params.id,
     _.pick(req.body, ["title", "description", "coverImageUrl", "userId"]),
@@ -26,7 +27,7 @@ exports.updatePodcast = async (req, res) => {
 };
 
 exports.getAllPodcasts = async (req, res) => {
-  let podcasts = await Podcast.find();
+  let podcasts = await Podcast.getAllPodcasts();
   res.send(podcasts);
 };
 
