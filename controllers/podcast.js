@@ -4,25 +4,29 @@ const router = express.Router();
 const { Podcast } = require("../models/podcast");
 const { Episode } = require("../models/episode");
 const { updateObject } = require("../utils/helpers");
+const { coverImageUpload } = require("../utils/cloudinary");
 
 exports.createPodcast = async (req, res) => {
+  const upload = await coverImageUpload(req);
+  if (!upload) return res.send({ status: false, message: "Upload error, try again", data: null })
   let podcast = new Podcast(req.body);
   podcast = await podcast.save();
   res.send({ status: true, message: null, data: podcast });
 };
 
 exports.updatePodcast = async (req, res) => {
-  
-  let podcast = await Podcast.findByIdAndUpdate(
-    req.params.id,
-    _.pick(req.body, ["title", "description", "coverImageUrl", "userId"]),
-    { new: true }
-  );
-
-  if (!podcast)
+  const podcastInDb = await Podcast.findById(req.params.id).lean();
+  if (!podcastInDb)
     return res
       .status(404)
       .send({ status: false, message: "Invalid Podcast", data: null });
+
+  let updatedPodcast = updateObject(req.body, podcastInDb);
+
+  let podcast = await Podcast.findByIdAndUpdate(req.params.id, updatedPodcast, {
+    new: true,
+  });
+
   res.send({ status: true, message: null, data: podcast });
 };
 
