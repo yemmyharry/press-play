@@ -24,6 +24,10 @@ const podcastSchema = new mongoose.Schema(
       maxlength: 255,
     },
     userId: mongoose.ObjectId,
+    episodeCount : {
+      type: Number,
+      default: 0
+    }
   },
   { timestamps: true }
 );
@@ -34,23 +38,27 @@ podcastSchema.statics.lookup = function (title, userId) {
 
 podcastSchema.statics.getOnePodcast = async function (podcastId) {
   let podcast = await this.findById(podcastId).lean();
-  const author = await User.findById(podcast.userId).select("firstName lastName bio");
+  const author = await User.findById(podcast.userId).select(
+    "firstName lastName bio"
+  );
 
   podcast.author = author;
-  podcast.date = formattedDate(podcast.createdAt)
+  podcast.date = formattedDate(podcast.createdAt);
 
   return podcast;
 };
 
 podcastSchema.statics.getAllPodcasts = async function () {
-  let podcasts = []
+  let podcasts = [];
   for await (let podcast of this.find().lean()) {
-    const author = await User.findById(podcast.userId).select("firstName lastName bio");
+    const author = await User.findById(podcast.userId).select(
+      "firstName lastName bio"
+    );
 
     podcast.author = author;
-    podcast.date = formattedDate(podcast.createdAt)
+    podcast.date = formattedDate(podcast.createdAt);
 
-    podcasts.push(podcast)
+    podcasts.push(podcast);
   }
 
   return podcasts;
@@ -66,19 +74,28 @@ const podcastExists = async function (req) {
   return podcast ? true : false;
 };
 
-function validatePodcast(podcast) {
-  const schema = Joi.object({
+function validatePodcast(req) {
+  let podcast = req.body;
+  let schema = Joi.object({
     title: Joi.string().min(2).max(255).required(),
     description: Joi.string().min(2).max(1024).required(),
     episodeAudio: Joi.any(),
     userId: Joi.objectId().required(),
   });
+
+  if (req.method === "PUT" || req.method === "PATCH") {
+    schema = Joi.object({
+      title: Joi.string().min(2).max(255),
+      description: Joi.string().min(2).max(1024),
+      episodeAudio: Joi.any(),
+      userId: Joi.objectId(),
+    });
+  }
+
   const result = schema.validate(podcast);
 
   return result;
 }
-
-
 
 exports.Podcast = Podcast;
 exports.podcastExists = podcastExists;
