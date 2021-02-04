@@ -37,7 +37,7 @@ exports.getEpisodesForPodcast = async (req, res) => {
 };
 
 exports.getPodcast = async (req, res) => {
-  let podcast = await Podcast.findById(req.params.id);
+  let podcast = await Podcast.getOnePodcast(req.params.id);
   if (!podcast)
     return res.status(404).send({
       status: false,
