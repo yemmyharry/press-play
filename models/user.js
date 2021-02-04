@@ -1,6 +1,5 @@
 const Joi = require("joi");
 const mongoose = require("mongoose");
-const { validate } = require("./podcast");
 
 const userSchema = mongoose.Schema(
   {
