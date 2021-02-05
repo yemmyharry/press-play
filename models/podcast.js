@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const { User } = require("../models/user");
 const _ = require("lodash");
 const { formattedDate } = require("../utils/helpers");
+const { Episode } = require("./episode");
 const podcastSchema = new mongoose.Schema(
   {
     title: {
@@ -24,16 +25,33 @@ const podcastSchema = new mongoose.Schema(
       maxlength: 255,
     },
     userId: mongoose.ObjectId,
-    episodeCount : {
+    episodeCount: {
       type: Number,
-      default: 0
-    }
+      default: 0,
+    },
+    subscriptionsCount: {
+      type: Number,
+      default: 0,
+    },
+    cloudinary: {
+      type: Object,
+    },
   },
   { timestamps: true }
 );
 
 podcastSchema.statics.lookup = function (title, userId) {
   return this.findOne({ title, userId: userId });
+};
+
+podcastSchema.statics.getAllPodcastData = async function (userId) {
+  let podcasts = [];
+  for await (let podcast of this.find({ userId }).select("-__v").lean()) {
+    const episodes = await Episode.find({ podcastId: podcast._id });
+    podcast.episodes = episodes;
+    podcasts.push(podcast);
+  }
+  return podcasts;
 };
 
 podcastSchema.statics.getOnePodcast = async function (podcastId) {
@@ -79,7 +97,8 @@ function validatePodcast(req) {
   let schema = Joi.object({
     title: Joi.string().min(2).max(255).required(),
     description: Joi.string().min(2).max(1024).required(),
-    episodeAudio: Joi.any(),
+    coverImage: Joi.any(),
+    coverImageUrl: Joi.String(),
     userId: Joi.objectId().required(),
   });
 
@@ -87,7 +106,8 @@ function validatePodcast(req) {
     schema = Joi.object({
       title: Joi.string().min(2).max(255),
       description: Joi.string().min(2).max(1024),
-      episodeAudio: Joi.any(),
+      coverImage: Joi.any(),
+      coverImageUrl: Joi.String(),
       userId: Joi.objectId(),
     });
   }

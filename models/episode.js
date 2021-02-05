@@ -19,6 +19,7 @@ const episodeSchema = new mongoose.Schema(
     },
     podcastId: mongoose.ObjectId,
     episodeAudioUrl: { type: String, required: true },
+    likesCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
@@ -42,12 +43,16 @@ function validateEpisode(req) {
   let schema = Joi.object({
     title: Joi.string().min(2).max(255).required(),
     description: Joi.string().min(2).max(1024).required(),
+    episodeAudio: Joi.any(),
+    episodeAudioUrl: Joi.String(),
     podcastId: Joi.objectId(),
   });
   if (req.method === "PUT" || req.method === "PATCH") {
     schema = Joi.object({
       title: Joi.string().min(2).max(255),
       description: Joi.string().min(2).max(1024),
+      episodeAudio: Joi.any(),
+      episodeAudioUrl: Joi.String(),
       podcastId: Joi.objectId(),
     });
   }
