@@ -1,5 +1,8 @@
 const Joi = require("joi");
 const mongoose = require("mongoose");
+const { formattedDate } = require("../utils/helpers");
+const { Episode } = require("./episode");
+const { Podcast } = require("./podcast");
 
 const userSchema = mongoose.Schema(
   {
@@ -39,7 +42,7 @@ const userSchema = mongoose.Schema(
       type: Array,
       default: [],
     },
-    likedPodcasts: {
+    likedEpisodes: {
       type: Array,
       default: [],
     },
@@ -67,22 +70,22 @@ userSchema.statics.unsubscribeFromPodcast = function (userId, podcastId) {
   );
 };
 
-userSchema.statics.hasLikedPodcast = function (podcastId) {
-  return this.findOne({ likedPodcasts: { $in: [podcastId] } });
+userSchema.statics.haslikedEpisode = function (podcastId) {
+  return this.findOne({ likedEpisodes: { $in: [podcastId] } });
 };
 
-userSchema.statics.likePodcast = function (userId, podcastId) {
+userSchema.statics.likeEpisode = function (userId, podcastId) {
   return this.findByIdAndUpdate(
     userId,
-    { $push: { likedPodcasts: podcastId } },
+    { $push: { likedEpisodes: podcastId } },
     { new: true }
   );
 };
 
-userSchema.statics.unlikePodcast = function (userId, podcastId) {
+userSchema.statics.unlikeEpisode = function (userId, podcastId) {
   return this.findByIdAndUpdate(
     userId,
-    { $pull: { likedPodcasts: podcastId } },
+    { $pull: { likedEpisodes: podcastId } },
     { new: true }
   );
 };
