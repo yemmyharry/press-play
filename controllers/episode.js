@@ -4,7 +4,6 @@ const _ = require("lodash");
 const router = express.Router();
 const { Episode } = require("../models/episode");
 const { audioUpload } = require("../utils/cloudinary");
-const { updateObject } = require("../utils/helpers");
 
 exports.createEpisode = async (req, res) => {
   const upload = await audioUpload(req);
@@ -17,17 +16,13 @@ exports.createEpisode = async (req, res) => {
 };
 
 exports.updateEpisode = async (req, res) => {
-  const episodeInDb = await Episode.findById(req.params.id).lean();
-  if (!episodeInDb)
+  let episode = await Episode.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+  });
+  if (!episode)
     return res
       .status(404)
       .send({ status: false, message: "Invalid Episode", data: null });
-
-  let updatedEpisode = updateObject(req.body, episodeInDb);
-
-  let episode = await Episode.findByIdAndUpdate(req.params.id, updatedEpisode, {
-    new: true,
-  });
 
   res.send({ status: true, message: null, data: episode });
 };
