@@ -38,6 +38,7 @@ const mailGenerator = new Mailgen({
 });
 
 const { sendPasswordResetMail } = require("../config/mail");
+const { Podcast } = require("../models/podcast");
 
 exports.userSignup = (req, res, next) => {
   const { firstName, lastName, email, password } = req.body;
@@ -125,6 +126,31 @@ exports.getLoggedInUser = async (req, res, next) => {
     message: null,
     data: user,
   });
+};
+
+exports.subscribeToPodcast = async (req, res) => {
+  const user = await User.findByIdAndUpdate(
+    req.user.userId,
+    { $push: { subscribedPodcasts: req.params.id } },
+    { new: true }
+  );
+  console.log(user);
+  res.send({ status: false, message: "subsribe to podcast", data: user });
+};
+
+exports.unSubscribeFromPodcast = async (req, res) => {
+  const user = await User.findByIdAndUpdate(
+    req.user.userId,
+    { $pull: { subscribedPodcasts: req.params.id } },
+    { new: true }
+  );
+  console.log(user);
+  res.send({ status: false, message: "subsribe to podcast", data: user });
+};
+
+exports.getAllPodcastData = async (req, res) => {
+  const podcastData = await Podcast.getAllPodcastData(req.params.id);
+  res.send({ status: true, message: null, data: podcastData });
 };
 
 exports.userLogin = (req, res, next) => {
@@ -311,6 +337,15 @@ exports.resetPassword = (req, res) => {
       data: null,
     });
   }
+};
+
+exports.updateUser = async (req, res) => {
+  const user = await User.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+  });
+  if (!user)
+    return res.send({ status: false, message: "Invalid User", data: null });
+  res.send({ status: true, message: null, data: user });
 };
 
 exports.deleteUser = async (req, res) => {
