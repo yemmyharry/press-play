@@ -61,7 +61,7 @@ exports.userSignup = (req, res, next) => {
       const token = jwt.sign(
         { firstName, lastName, email, password },
         ACCOUNT_ACTIVATE,
-        { expiresIn: "30m" }
+        { expiresIn: "1h" }
       );
       const response = {
         body: {
@@ -169,22 +169,28 @@ exports.unsubscribeFromPodcast = async (req, res) => {
 };
 
 exports.getLikedEpisodes = async (req, res) => {
-  const likedPodcasts = await Episode.find({userId: req.user.userId});
+  const likedEpisodes = await User.getLikedEpisodes(req.user.userId);
 
-  res.send({ status: true, message: null, data: likedPodcasts });
+  res.send({ status: true, message: null, data: likedEpisodes });
 };
 
-exports.likePodcast = async (req, res) => {
+exports.getSubscriptions = async (req, res) => {
+  const subscriptions = await User.getSubscriptions(req.user.userId);
+
+  res.send({ status: true, message: null, data: subscriptions });
+};
+
+exports.likeEpisode = async (req, res) => {
   const episodeId = req.params.id;
-  const hasLikedPodcast = await User.hasLikedPodcast(episodeId);
-  if (hasLikedPodcast)
+  const haslikedEpisode = await User.haslikedEpisode(episodeId);
+  if (haslikedEpisode)
     return res.send({
       status: false,
       message: "User has already liked this Episode",
       data: null,
     });
 
-  const user = await User.likePodcast(req.user.userId, episodeId);
+  const user = await User.likeEpisode(req.user.userId, episodeId);
 
   await Episode.findByIdAndUpdate(episodeId, {
     $inc: { likesCount: +1 },
@@ -193,17 +199,17 @@ exports.likePodcast = async (req, res) => {
   res.send({ status: true, message: null, data: user });
 };
 
-exports.unlikePodcast = async (req, res) => {
+exports.unlikeEpisode = async (req, res) => {
   const episodeId = req.params.id;
-  const hasLikedPodcast = await User.hasLikedPodcast(episodeId);
-  if (!hasLikedPodcast)
+  const haslikedEpisode = await User.haslikedEpisode(episodeId);
+  if (!haslikedEpisode)
     return res.send({
       status: false,
       message: "User has not liked this Episode",
       data: null,
     });
 
-  const user = await User.unlikePodcast(req.user.userId, episodeId);
+  const user = await User.unlikeEpisode(req.user.userId, episodeId);
 
   await Episode.findOneAndUpdate(
     { _id: episodeId, likesCount: { $gte: 0 } },
