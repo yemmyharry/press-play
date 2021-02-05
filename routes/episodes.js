@@ -9,7 +9,7 @@ const postMiddlewares = [
   validateBody(validateEpisode),
   validateIfExisting(episodeExists, "Episode"),
 ];
-const putMiddlewares = [validateObjectId, validateBody(validateEpisode),];
+const putMiddlewares = [validateObjectId, validateBody(validateEpisode)];
 const router = express.Router();
 
 const {
@@ -26,11 +26,7 @@ router.get("/:id", getEpisode);
 
 router.post("/", [audioUpload("episodeAudio", postMiddlewares)], createEpisode);
 
-router.put(
-  "/:id",
-  [audioUpload("episodeAudio", putMiddlewares)],
-  updateEpisode
-);
+router.put("/:id", [audioUpload("episodeAudio", putMiddlewares)], updateEpisode);
 
 router.delete("/:id", deleteEpisode);
 
