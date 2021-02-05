@@ -20,6 +20,7 @@ const episodeSchema = new mongoose.Schema(
     podcastId: mongoose.ObjectId,
     episodeAudioUrl: { type: String, required: true },
     likesCount: { type: Number, default: 0 },
+    playsCount: { type: Number, default: 0 },
     cloudinary: Object,
   },
   { timestamps: true }
@@ -45,13 +46,14 @@ function validateEpisode(req) {
     title: Joi.string().min(2).max(255).required(),
     description: Joi.string().min(2).max(1024).required(),
     episodeAudio: Joi.any(),
-    podcastId: Joi.objectId(),
+    podcastId: Joi.objectId().required(),
   });
   if (req.method === "PUT" || req.method === "PATCH") {
     schema = Joi.object({
       title: Joi.string().min(2).max(255),
       description: Joi.string().min(2).max(1024),
       episodeAudio: Joi.any(),
+      playsCount: Joi.number()
     });
   }
   const result = schema.validate(episode);
