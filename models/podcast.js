@@ -98,7 +98,6 @@ function validatePodcast(req) {
     title: Joi.string().min(2).max(255).required(),
     description: Joi.string().min(2).max(1024).required(),
     coverImage: Joi.any(),
-    coverImageUrl: Joi.String(),
     userId: Joi.objectId().required(),
   });
 
@@ -107,7 +106,7 @@ function validatePodcast(req) {
       title: Joi.string().min(2).max(255),
       description: Joi.string().min(2).max(1024),
       coverImage: Joi.any(),
-      coverImageUrl: Joi.String(),
+      coverImageUrl: Joi.string(),
       userId: Joi.objectId(),
     });
   }
