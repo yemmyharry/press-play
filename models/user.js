@@ -46,6 +46,26 @@ const userSchema = mongoose.Schema(
   { timestamps: true }
 );
 
+userSchema.statics.isSubscribed = function (podcastId) {
+  return this.findOne({ subscribedPodcasts: { $in: [podcastId] } });
+};
+
+userSchema.statics.subscribeToPodcast = function (userId, podcastId) {
+  return this.findByIdAndUpdate(
+    userId,
+    { $push: { subscribedPodcasts: podcastId } },
+    { new: true }
+  );
+};
+
+userSchema.statics.unsubscribeFromPodcast = function (userId, podcastId) {
+  return this.findByIdAndUpdate(
+    userId,
+    { $pull: { subscribedPodcasts: podcastId } },
+    { new: true }
+  );
+};
+ 
 const User = mongoose.model("User", userSchema);
 
 function validateUser(req) {
