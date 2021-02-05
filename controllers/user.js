@@ -175,7 +175,7 @@ exports.getLikedEpisodes = async (req, res) => {
 };
 
 exports.getSubscriptions = async (req, res) => {
-  const subscriptions = await User.getSubscriptions(req.user.userId);
+  const subscriptions = await User.getSubscriptions(Podcast, req.user.userId);
 
   res.send({ status: true, message: null, data: subscriptions });
 };
