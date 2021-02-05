@@ -222,7 +222,7 @@ exports.unlikeEpisode = async (req, res) => {
 };
 
 exports.getAllPodcastData = async (req, res) => {
-  const podcastData = await Podcast.getAllPodcastData(req.params.id);
+  const podcastData = await Podcast.getAllPodcastData(req.user.userId);
   res.send({ status: true, message: null, data: podcastData });
 };
 
