@@ -11,7 +11,7 @@ const postMiddlewares = [
   validateIfExisting(podcastExists, "Podcast"),
 ];
 
-const putMiddlewares = [validateObjectId, [...postMiddlewares]];
+const putMiddlewares = [validateObjectId, validateBody(validatePodcast)];
 
 const {
   createPodcast,

@@ -9,7 +9,7 @@ const postMiddlewares = [
   validateBody(validateEpisode),
   validateIfExisting(episodeExists, "Episode"),
 ];
-const putMiddlewares = [validateObjectId, ...postMiddlewares];
+const putMiddlewares = [validateObjectId, validateBody(validateEpisode),];
 const router = express.Router();
 
 const {
