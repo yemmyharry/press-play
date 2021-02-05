@@ -17,7 +17,7 @@ const {
   ACCOUNT_ACTIVATE,
 } = process.env;
 
-const base = `${APP_URL}`;
+const baseUrl = `${APP_URL}`;
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -40,7 +40,6 @@ const mailGenerator = new Mailgen({
 });
 
 const { sendPasswordResetMail } = require("../config/mail");
-
 
 exports.userSignup = (req, res, next) => {
   const { firstName, lastName, email, password } = req.body;
@@ -72,7 +71,7 @@ exports.userSignup = (req, res, next) => {
             instructions: "To activate your account, click on the link below:",
             button: {
               text: "Activate Account",
-              link: `${base}/api/users/activate-account?token=${token}`,
+              link: `${baseUrl}/api/users/activate-account?token=${token}`,
             },
           },
           outro: "Do not share this link with anyone.",
@@ -148,7 +147,7 @@ exports.subscribeToPodcast = async (req, res) => {
   res.send({ status: true, message: null, data: user });
 };
 
-exports.unSubscribeFromPodcast = async (req, res) => {
+exports.unsubscribeFromPodcast = async (req, res) => {
   const podcastId = req.params.id;
   const isSubscribed = await User.isSubscribed(podcastId);
   if (!isSubscribed)
@@ -163,6 +162,53 @@ exports.unSubscribeFromPodcast = async (req, res) => {
     { _id: podcastId, subscriptionsCount: { $gte: 0 } },
     {
       $inc: { subscriptionsCount: -1 },
+    }
+  );
+
+  res.send({ status: true, message: null, data: user });
+};
+
+exports.getLikedEpisodes = async (req, res) => {
+  const likedPodcasts = await Episode.find({userId: req.user.userId});
+
+  res.send({ status: true, message: null, data: likedPodcasts });
+};
+
+exports.likePodcast = async (req, res) => {
+  const episodeId = req.params.id;
+  const hasLikedPodcast = await User.hasLikedPodcast(episodeId);
+  if (hasLikedPodcast)
+    return res.send({
+      status: false,
+      message: "User has already liked this Episode",
+      data: null,
+    });
+
+  const user = await User.likePodcast(req.user.userId, episodeId);
+
+  await Episode.findByIdAndUpdate(episodeId, {
+    $inc: { likesCount: +1 },
+  });
+
+  res.send({ status: true, message: null, data: user });
+};
+
+exports.unlikePodcast = async (req, res) => {
+  const episodeId = req.params.id;
+  const hasLikedPodcast = await User.hasLikedPodcast(episodeId);
+  if (!hasLikedPodcast)
+    return res.send({
+      status: false,
+      message: "User has not liked this Episode",
+      data: null,
+    });
+
+  const user = await User.unlikePodcast(req.user.userId, episodeId);
+
+  await Episode.findOneAndUpdate(
+    { _id: episodeId, likesCount: { $gte: 0 } },
+    {
+      $inc: { likesCount: -1 },
     }
   );
 
@@ -268,7 +314,6 @@ exports.forgotPassword = (req, res) => {
 
   User.findOne({ email }).exec((err, user) => {
     if (err || !user) {
-      console.log("Error or User does not exist");
       res.send({ status: false, message: "User does not exist", data: null });
     }
     const token = jwt.sign({ _id: user._id }, RESET_PASSWORD_KEY, {
