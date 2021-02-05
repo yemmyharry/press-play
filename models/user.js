@@ -2,7 +2,6 @@ const Joi = require("joi");
 const mongoose = require("mongoose");
 const { formattedDate } = require("../utils/helpers");
 const { Episode } = require("./episode");
-const { Podcast } = require("./podcast");
 
 const userSchema = mongoose.Schema(
   {
@@ -79,7 +78,9 @@ userSchema.statics.getLikedEpisodes = async function (userId) {
   const episodeIds = user.likedEpisodes;
   let episodes = [];
   for await (let episodeId of episodeIds) {
-    const episode = await Episode.findById(episodeId).select("-__v -cloudinary").lean();
+    const episode = await Episode.findById(episodeId)
+      .select("-__v -cloudinary")
+      .lean();
 
     episode.date = formattedDate(episode.createdAt);
 
@@ -89,12 +90,14 @@ userSchema.statics.getLikedEpisodes = async function (userId) {
   return episodes;
 };
 
-userSchema.statics.getSubscriptions = async function (userId) {
+userSchema.statics.getSubscriptions = async function (Podcast, userId) {
   const user = await this.findById(userId);
   const podcastIds = user.subscribedPodcasts;
   let podcasts = [];
   for await (let podcastId of podcastIds) {
-    const podcast = await Podcast.findById(podcastId).select("-__v -cloudinary").lean();
+    const podcast = await Podcast.findById(podcastId)
+      .select("-__v -cloudinary")
+      .lean();
 
     podcast.date = formattedDate(podcast.createdAt);
 
