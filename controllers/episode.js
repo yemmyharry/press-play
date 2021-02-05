@@ -39,7 +39,7 @@ exports.updateEpisode = async (req, res) => {
 };
 
 exports.getAllEpisodes = async (req, res) => {
-  let episodes = await Episode.find();
+  let episodes = await Episode.find().select("-__v -cloudinary");
   res.send(episodes);
 };
 
