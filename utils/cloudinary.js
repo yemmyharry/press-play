@@ -39,8 +39,18 @@ async function coverImageUpload(req) {
     folder: "press-play/coverImages",
     use_filename: true,
   });
+
   req.body.coverImageUrl = uploadResult.secure_url;
+  req.body.cloudinary = uploadResult;
   return uploadResult;
+}
+
+async function deleteFile(path, resource_type) {
+  const deleteResult = await cloudinary.uploader.destroy(path, {
+    resource_type,
+  });
+  console.log(deleteResult);
+  return deleteResult;
 }
 
 async function audioUpload(req) {
@@ -52,8 +62,10 @@ async function audioUpload(req) {
     use_filename: true,
   });
   req.body.episodeAudioUrl = uploadResult.secure_url;
+  req.body.cloudinary = uploadResult;
   return uploadResult;
 }
 
 exports.coverImageUpload = coverImageUpload;
 exports.audioUpload = audioUpload;
+exports.deleteFile = deleteFile;
