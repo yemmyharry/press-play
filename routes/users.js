@@ -26,7 +26,7 @@ const { validateUser, validateLogin } = require("../models/user");
 
 router.get("/me", checkAuth, getLoggedInUser);
 
-router.get("/:id/podcasts", [checkAuth, validateObjectId], getAllPodcastData);
+router.get("/podcasts", checkAuth, getAllPodcastData);
 
 router.post("/signup", validateBody(validateUser), userSignup);
 
