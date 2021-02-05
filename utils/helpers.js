@@ -9,21 +9,5 @@ let formattedDate = (dateString) => {
   return `${day}-${month}-${year}`;
 };
 
-function updateObject(objectToCompare, objectToUpdate) {
-  objectToUpdateProps = Object.keys(objectToUpdate);
-  for (let property in objectToCompare) {
-    if (
-      property === "_id" ||
-      property === "createdAt" ||
-      property === "updatedAt"
-    )
-      continue;
-    if (objectToUpdateProps.includes(property))
-      objectToUpdate[property] = objectToCompare[property];
-  }
-
-  return objectToUpdate;
-}
-
+ 
 exports.formattedDate = formattedDate;
-exports.updateObject = updateObject;
