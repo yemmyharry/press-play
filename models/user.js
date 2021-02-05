@@ -17,6 +17,7 @@ const userSchema = mongoose.Schema(
     },
     email: {
       type: String,
+      unique: true,
       required: true,
       minlength: 5,
       maxlength: 255,
@@ -65,7 +66,27 @@ userSchema.statics.unsubscribeFromPodcast = function (userId, podcastId) {
     { new: true }
   );
 };
- 
+
+userSchema.statics.hasLikedPodcast = function (podcastId) {
+  return this.findOne({ likedPodcasts: { $in: [podcastId] } });
+};
+
+userSchema.statics.likePodcast = function (userId, podcastId) {
+  return this.findByIdAndUpdate(
+    userId,
+    { $push: { likedPodcasts: podcastId } },
+    { new: true }
+  );
+};
+
+userSchema.statics.unlikePodcast = function (userId, podcastId) {
+  return this.findByIdAndUpdate(
+    userId,
+    { $pull: { likedPodcasts: podcastId } },
+    { new: true }
+  );
+};
+
 const User = mongoose.model("User", userSchema);
 
 function validateUser(req) {
