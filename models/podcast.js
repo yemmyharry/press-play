@@ -1,9 +1,10 @@
 const Joi = require("joi");
 const mongoose = require("mongoose");
-const { User } = require("../models/user");
 const _ = require("lodash");
+
 const { formattedDate } = require("../utils/helpers");
 const { Episode } = require("./episode");
+
 const podcastSchema = new mongoose.Schema(
   {
     title: {
