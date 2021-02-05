@@ -34,6 +34,14 @@ const userSchema = mongoose.Schema(
     },
     isAuthor: { type: Boolean, default: false },
     bio: { type: String, maxlength: 255, default: "" },
+    subscribedPodcasts: {
+      type: Array,
+      default: [],
+    },
+    likedPodcasts: {
+      type: Array,
+      default: [],
+    },
   },
   { timestamps: true }
 );
