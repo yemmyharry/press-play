@@ -1,17 +1,12 @@
 const express = require("express");
+const router = express.Router();
+const checkAuth = require("../middlewares/checkAuth");
 const coverImageUpload = require("../middlewares/handleCoverImageUploads");
 const validateObjectId = require("../middlewares/validateObjectId");
 const validateBody = require("../middlewares/validateBody");
 const validateIfExisting = require("../middlewares/validateIfExisting");
+
 const { podcastExists, validatePodcast } = require("../models/podcast");
-const router = express.Router();
-
-const postMiddlewares = [
-  validateBody(validatePodcast),
-  validateIfExisting(podcastExists, "Podcast"),
-];
-
-const putMiddlewares = [validateObjectId, validateBody(validatePodcast)];
 
 const {
   createPodcast,
@@ -20,8 +15,15 @@ const {
   getEpisodesForPodcast,
   getPodcast,
   deletePodcast,
-  searchPodcasts
+  searchPodcasts,
 } = require("../controllers/podcast");
+
+const postMiddlewares = [
+  validateBody(validatePodcast),
+  validateIfExisting(podcastExists, "Podcast"),
+];
+
+const putMiddlewares = [validateObjectId, validateBody(validatePodcast)];
 
 router.get("/", getAllPodcastsWithEpisodes);
 
@@ -33,16 +35,16 @@ router.get("/:id/episodes", getEpisodesForPodcast);
 
 router.post(
   "/",
-  [coverImageUpload("coverImage", postMiddlewares)],
+  [checkAuth, coverImageUpload("coverImage", postMiddlewares)],
   createPodcast
 );
 
 router.put(
   "/:id",
-  [coverImageUpload("coverImage", putMiddlewares)],
+  [checkAuth, coverImageUpload("coverImage", putMiddlewares)],
   updatePodcast
 );
 
-router.delete("/:id", validateObjectId, deletePodcast);
+router.delete("/:id", [checkAuth, validateObjectId], deletePodcast);
 
 module.exports = router;
