@@ -3,8 +3,8 @@ const _ = require("lodash");
 const router = express.Router();
 const { Podcast } = require("../models/podcast");
 const { Episode } = require("../models/episode");
-const { coverImageUpload, deleteFile } = require("../utils/cloudinary");
 const { User } = require("../models/user");
+const { coverImageUpload, deleteFile } = require("../utils/cloudinary");
 
 exports.createPodcast = async (req, res) => {
   const upload = await coverImageUpload(req);
