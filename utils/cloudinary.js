@@ -49,7 +49,6 @@ async function deleteFile(path, resource_type) {
   const deleteResult = await cloudinary.uploader.destroy(path, {
     resource_type,
   });
-  console.log(deleteResult);
   return deleteResult;
 }
 
