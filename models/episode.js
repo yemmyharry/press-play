@@ -27,7 +27,7 @@ const episodeSchema = new mongoose.Schema(
 );
 
 episodeSchema.statics.lookup = function (title, userId) {
-  return this.findOne({ title: title, userId: userId });
+  return this.findOne({ title: title, userId: userId }).select("-__v -cloudinary");
 };
 
 const episodeExists = async function (req) {
