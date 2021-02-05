@@ -4,29 +4,37 @@ const router = express.Router();
 const { Podcast } = require("../models/podcast");
 const { Episode } = require("../models/episode");
 const { updateObject } = require("../utils/helpers");
-const { coverImageUpload } = require("../utils/cloudinary");
+const { coverImageUpload, deleteFile } = require("../utils/cloudinary");
 
 exports.createPodcast = async (req, res) => {
   const upload = await coverImageUpload(req);
-  if (!upload) return res.send({ status: false, message: "Upload error, try again", data: null })
+  if (!upload)
+    return res.send({
+      status: false,
+      message: "Upload error, please try again",
+      data: null,
+    });
   let podcast = new Podcast(req.body);
   podcast = await podcast.save();
   res.send({ status: true, message: null, data: podcast });
 };
 
 exports.updatePodcast = async (req, res) => {
-  const podcastInDb = await Podcast.findById(req.params.id).lean();
-  if (!podcastInDb)
-    return res
-      .status(404)
-      .send({ status: false, message: "Invalid Podcast", data: null });
+  if (req.file && req.file.fieldname === "coverImage") {
+    deleteOldFile = await deleteFile(req, podcastInDb.cloudinary.public_id);
 
-  let updatedPodcast = updateObject(req.body, podcastInDb);
+    upload = coverImageUpload();
+  }
 
-  let podcast = await Podcast.findByIdAndUpdate(req.params.id, updatedPodcast, {
+  let podcast = await Podcast.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
   });
 
+  if (!podcast)
+    return res
+      .status(404)
+      .send({ status: false, message: "Invalid Podcast", data: null });
+      
   res.send({ status: true, message: null, data: podcast });
 };
 
