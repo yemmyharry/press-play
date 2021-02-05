@@ -74,6 +74,22 @@ userSchema.statics.haslikedEpisode = function (podcastId) {
   return this.findOne({ likedEpisodes: { $in: [podcastId] } });
 };
 
+userSchema.statics.getLikedEpisodes = async function (userId) {
+  const user = await this.findById(userId);
+  const episodeIds = user.likedEpisodes;
+  let episodes = [];
+  for await (let episodeId of episodeIds) {
+    const episode = await Episode.findById(episodeId).select("-__v -cloudinary").lean();
+
+    episode.date = formattedDate(episode.createdAt);
+
+    episodes.push(episode);
+  }
+
+  return episodes;
+};
+
+
 userSchema.statics.likeEpisode = function (userId, podcastId) {
   return this.findByIdAndUpdate(
     userId,
