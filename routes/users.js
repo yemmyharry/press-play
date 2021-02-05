@@ -15,6 +15,7 @@ const {
   likeEpisode,
   unlikeEpisode,
   getLikedEpisodes,
+  getSubscriptions,
 } = require("../controllers/user");
 
 const checkAuth = require("../middlewares/checkAuth");
