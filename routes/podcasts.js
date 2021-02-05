@@ -16,13 +16,16 @@ const putMiddlewares = [validateObjectId, validateBody(validatePodcast)];
 const {
   createPodcast,
   updatePodcast,
-  getAllPodcasts,
+  getAllPodcastsWithEpisodes,
   getEpisodesForPodcast,
   getPodcast,
   deletePodcast,
+  searchPodcasts
 } = require("../controllers/podcast");
 
-router.get("/", getAllPodcasts);
+router.get("/", getAllPodcastsWithEpisodes);
+
+router.get("/search/:title", searchPodcasts);
 
 router.get("/:id", validateObjectId, getPodcast);
 
