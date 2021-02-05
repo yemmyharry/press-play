@@ -12,9 +12,9 @@ const {
   subscribeToPodcast,
   unsubscribeFromPodcast,
   updateUser,
-  likePodcast,
-  unlikePodcast,
-  getLikedEpisodes,
+  likeEpisode,
+  unlikeEpisode,
+  
 } = require("../controllers/user");
 
 const checkAuth = require("../middlewares/checkAuth");
@@ -29,15 +29,25 @@ router.get("/:id/podcasts", [checkAuth, validateObjectId], getAllPodcastData);
 
 router.post("/signup", validateBody(validateUser), userSignup);
 
-router.post("/subscribe/:id", [checkAuth, validateObjectId], subscribeToPodcast);
+router.get("/subscriptions", checkAuth, getSubscriptions);
 
-router.put("/unsubscribe/:id", [checkAuth, validateObjectId], unsubscribeFromPodcast);
+router.post(
+  "/subscribe/:id",
+  [checkAuth, validateObjectId],
+  subscribeToPodcast
+);
 
-router.get("/likes", [checkAuth, validateObjectId], getLikedEpisodes);
+router.put(
+  "/unsubscribe/:id",
+  [checkAuth, validateObjectId],
+  unsubscribeFromPodcast
+);
 
-router.post("/like/:id", [checkAuth, validateObjectId], likePodcast);
+router.get("/likes", checkAuth, getLikedEpisodes);
 
-router.put("/unlike/:id", [checkAuth, validateObjectId], unlikePodcast);
+router.post("/like/:id", [checkAuth, validateObjectId], likeEpisode);
+
+router.put("/unlike/:id", [checkAuth, validateObjectId], unlikeEpisode);
 
 router.get("/activate-account", activateAccount);
 
