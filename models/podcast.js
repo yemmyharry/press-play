@@ -28,10 +28,12 @@ const podcastSchema = new mongoose.Schema(
     episodeCount: {
       type: Number,
       default: 0,
+      min: 0,
     },
     subscriptionsCount: {
       type: Number,
       default: 0,
+      min: 0,
     },
     cloudinary: {
       type: Object,
@@ -46,12 +48,20 @@ podcastSchema.statics.lookup = function (title, userId) {
 
 podcastSchema.statics.getAllPodcastData = async function (userId) {
   let podcasts = [];
-  for await (let podcast of this.find({ userId }).select("-__v").lean()) {
-    const episodes = await Episode.find({ podcastId: podcast._id });
+  for await (let podcast of this.find({ userId })
+    .select("-__v -cloudinary")
+    .lean()) {
+    const episodes = await Episode.find({ podcastId: podcast._id }).select(
+      "-cloudinary"
+    );
     podcast.episodes = episodes;
     podcasts.push(podcast);
   }
   return podcasts;
+};
+
+podcastSchema.statics.search = function (title) {
+  return this.find({ title: { $regex: title, $options: "i" }, episodeCount: { $gt: 0 } });
 };
 
 podcastSchema.statics.getOnePodcast = async function (podcastId) {
@@ -66,9 +76,9 @@ podcastSchema.statics.getOnePodcast = async function (podcastId) {
   return podcast;
 };
 
-podcastSchema.statics.getAllPodcasts = async function () {
+podcastSchema.statics.getAllPodcastsWithEpisodes = async function () {
   let podcasts = [];
-  for await (let podcast of this.find().lean()) {
+  for await (let podcast of this.find({ episodeCount: { $gt: 0 } }).lean()) {
     const author = await User.findById(podcast.userId).select(
       "firstName lastName bio"
     );
