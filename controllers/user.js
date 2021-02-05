@@ -2,6 +2,8 @@ require("dotenv").config();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { User } = require("../models/user");
+const { Podcast } = require("../models/podcast");
+const { Episode } = require("../models/episode");
 const _ = require("lodash");
 const nodemailer = require("nodemailer");
 const Mailgen = require("mailgen");
@@ -38,7 +40,7 @@ const mailGenerator = new Mailgen({
 });
 
 const { sendPasswordResetMail } = require("../config/mail");
-const { Podcast } = require("../models/podcast");
+
 
 exports.userSignup = (req, res, next) => {
   const { firstName, lastName, email, password } = req.body;
@@ -129,23 +131,42 @@ exports.getLoggedInUser = async (req, res, next) => {
 };
 
 exports.subscribeToPodcast = async (req, res) => {
-  const user = await User.findByIdAndUpdate(
-    req.user.userId,
-    { $push: { subscribedPodcasts: req.params.id } },
-    { new: true }
-  );
-  console.log(user);
-  res.send({ status: false, message: "subsribe to podcast", data: user });
+  const podcastId = req.params.id;
+  const isSubscribed = await User.isSubscribed(podcastId);
+  if (isSubscribed)
+    return res.send({
+      status: false,
+      message: "User is already subscribed",
+      data: null,
+    });
+  const user = await User.subscribeToPodcast(req.user.userId, podcastId);
+
+  await Podcast.findByIdAndUpdate(podcastId, {
+    $inc: { subscriptionsCount: +1 },
+  });
+
+  res.send({ status: true, message: null, data: user });
 };
 
 exports.unSubscribeFromPodcast = async (req, res) => {
-  const user = await User.findByIdAndUpdate(
-    req.user.userId,
-    { $pull: { subscribedPodcasts: req.params.id } },
-    { new: true }
+  const podcastId = req.params.id;
+  const isSubscribed = await User.isSubscribed(podcastId);
+  if (!isSubscribed)
+    return res.send({
+      status: false,
+      message: "User is not subscribed to this podcast",
+      data: null,
+    });
+  const user = await User.unsubscribeFromPodcast(req.user.userId, podcastId);
+
+  await Podcast.findOneAndUpdate(
+    { _id: podcastId, subscriptionsCount: { $gte: 0 } },
+    {
+      $inc: { subscriptionsCount: -1 },
+    }
   );
-  console.log(user);
-  res.send({ status: false, message: "subsribe to podcast", data: user });
+
+  res.send({ status: true, message: null, data: user });
 };
 
 exports.getAllPodcastData = async (req, res) => {
