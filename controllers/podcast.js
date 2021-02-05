@@ -39,8 +39,8 @@ exports.updatePodcast = async (req, res) => {
   res.send({ status: true, message: null, data: podcast });
 };
 
-exports.getAllPodcasts = async (req, res) => {
-  let podcasts = await Podcast.getAllPodcasts();
+exports.getAllPodcastsWithEpisodes = async (req, res) => {
+  let podcasts = await Podcast.getAllPodcastsWithEpisodes();
   res.send(podcasts);
 };
 
@@ -61,12 +61,18 @@ exports.getPodcast = async (req, res) => {
   res.send(podcast);
 };
 
+exports.searchPodcasts = async (req, res) => {
+  let podcasts = await Podcast.search(req.params.title);
+  res.send(podcasts);
+};
+
+
 exports.deletePodcast = async (req, res) => {
   const podcast = await Podcast.findByIdAndDelete(req.params.id);
   if (!podcast)
     return res.send({ status: false, message: "Invalid Podcast", data: null });
 
   deleteOldFile = await deleteFile(podcast.cloudinary.public_id, "image");
-  
+
   res.send({ status: true, message: null, data: podcast });
 };
