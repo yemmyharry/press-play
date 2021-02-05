@@ -1,16 +1,14 @@
 const express = require("express");
+const router = express.Router();
+
+const checkAuth = require("../middlewares/checkAuth");
 const audioUpload = require("../middlewares/handleAudioUploads");
 const validateObjectId = require("../middlewares/validateObjectId");
 const validateBody = require("../middlewares/validateBody");
 const validateIfExisting = require("../middlewares/validateIfExisting");
+
 const { validateEpisode, episodeExists } = require("../models/episode");
 
-const postMiddlewares = [
-  validateBody(validateEpisode),
-  validateIfExisting(episodeExists, "Episode"),
-];
-const putMiddlewares = [validateObjectId, validateBody(validateEpisode)];
-const router = express.Router();
 
 const {
   createEpisode,
@@ -20,14 +18,20 @@ const {
   deleteEpisode,
 } = require("../controllers/episode");
 
+const postMiddlewares = [
+  validateBody(validateEpisode),
+  validateIfExisting(episodeExists, "Episode"),
+];
+const putMiddlewares = [validateObjectId, validateBody(validateEpisode)];
+
 router.get("/", getAllEpisodes);
 
 router.get("/:id", getEpisode);
 
-router.post("/", [audioUpload("episodeAudio", postMiddlewares)], createEpisode);
+router.post("/", [checkAuth, audioUpload("episodeAudio", postMiddlewares)], createEpisode);
 
-router.put("/:id", [audioUpload("episodeAudio", putMiddlewares)], updateEpisode);
+router.put("/:id", [checkAuth, audioUpload("episodeAudio", putMiddlewares)], updateEpisode);
 
-router.delete("/:id", deleteEpisode);
+router.delete("/:id", checkAuth, deleteEpisode);
 
 module.exports = router;
