@@ -1,15 +1,17 @@
 const mongoose = require("mongoose");
+const winston = require("winston")
 
+const db = "mongodb://localhost:27017/pressPlay"
 module.exports = () => {
   mongoose
-    .connect("mongodb://localhost:27017/pressPlay", {
+    .connect(db, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       useFindAndModify: false,
       useCreateIndex: true,
     })
     .then(() => {
-      console.log("Connected to mongodb");
+      winston.info(`Connected to ${db}`);
     })
     .catch((err) => {
       return err.message;
