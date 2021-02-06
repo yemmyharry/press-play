@@ -7,15 +7,20 @@ const { User } = require("../models/user");
 const { coverImageUpload, deleteFile } = require("../utils/cloudinary");
 
 exports.createPodcast = async (req, res) => {
+  
   const upload = await coverImageUpload(req);
   if (!upload)
-    return res.send({
-      status: false,
-      message: "Upload error, please try again",
-      data: null,
-    });
+  return res.send({
+    status: false,
+    message: "Upload error, please try again",
+    data: null,
+  });
   let podcast = new Podcast(req.body);
   podcast = await podcast.save();
+  
+  await User.findByIdAndUpdate(req.user.userId, {
+    isAuthor: true,
+  });
   res.send({ status: true, message: null, data: podcast });
 };
 
@@ -65,7 +70,6 @@ exports.searchPodcasts = async (req, res) => {
   let podcasts = await Podcast.search(req.params.title);
   res.send(podcasts);
 };
-
 
 exports.deletePodcast = async (req, res) => {
   const podcast = await Podcast.findByIdAndDelete(req.params.id);
