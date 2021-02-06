@@ -54,6 +54,10 @@ app.use("/api/podcasts", podcastsRouter);
 
 app.use("/api/episodes", episodesRouter);
 
+app.use("*", (req, res) => {
+  res.send({ status: false, message: "This is an invalid route", data: null });
+});
+
 app.use(error);
 
 app.listen(process.env.PORT || 4000, () => {
