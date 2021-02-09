@@ -8,6 +8,8 @@ require("./config/logging")();
 require("./config/db")();
 require("./routes/index")(app);
 
-app.listen(process.env.PORT || 4000, () => {
+const PORT = process.env.PORT || 4000
+
+app.listen(PORT, () => {
   winston.info("app listening at port 4000");
 });
