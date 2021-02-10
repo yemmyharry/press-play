@@ -3,10 +3,11 @@ const _ = require("lodash");
 
 const router = express.Router();
 const { Episode } = require("../models/episode");
+const { Podcast } = require("../models/podcast");
 const { audioUpload, deleteFile } = require("../utils/cloudinary");
 
 exports.createEpisode = async (req, res) => {
-  const upload = await audioUpload(req);
+  const upload = await audioUpload(req, res);
   if (!upload)
     return res.send({
       status: false,
@@ -14,6 +15,9 @@ exports.createEpisode = async (req, res) => {
       data: null,
     });
   let episode = new Episode(req.body);
+  await Podcast.findByIdAndUpdate(req.body.podcastId, {
+    $inc: { episodeCount: +1 },
+  });
   episode = await episode.save();
   res.send({ status: true, message: null, data: episode });
 };
@@ -23,7 +27,7 @@ exports.updateEpisode = async (req, res) => {
   if (req.file && req.file.fieldname === "episodeAudio") {
     deleteOldFile = await deleteFile(episodeInDb.cloudinary.public_id, "video");
 
-    upload = await audioUpload(req);
+    upload = await audioUpload(req, res);
   }
 
   let episode = await Episode.findByIdAndUpdate(req.params.id, req.body, {
@@ -60,6 +64,8 @@ exports.deleteEpisode = async (req, res) => {
     return res.send({ status: false, message: "Invalid Episode", data: null });
 
   deleteOldFile = await deleteFile(episode.cloudinary.public_id, "video");
-
+  await Podcast.findByIdAndUpdate(episode.podcastId, {
+    $inc: { episodeCount: -1 },
+  });
   res.send({ status: true, message: null, data: episode });
 };
