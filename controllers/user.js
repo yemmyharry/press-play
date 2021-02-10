@@ -244,7 +244,7 @@ exports.userLogin = (req, res, next) => {
       }
       if (result) {
         const token = jwt.sign({ userId: user._id }, SECRET, {
-          expiresIn: "1d",
+          expiresIn: "1 day",
         });
         return res.status(200).send({
           status: true,
