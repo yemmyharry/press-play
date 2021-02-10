@@ -8,7 +8,7 @@ const { coverImageUpload, deleteFile } = require("../utils/cloudinary");
 
 exports.createPodcast = async (req, res) => {
   
-  const upload = await coverImageUpload(req);
+  const upload = await coverImageUpload(req, res);
   if (!upload)
   return res.send({
     status: false,
@@ -29,7 +29,7 @@ exports.updatePodcast = async (req, res) => {
   if (req.file && req.file.fieldname === "coverImage") {
     deleteOldFile = await deleteFile(podCastInDb.cloudinary.public_id, "image");
 
-    upload = await coverImageUpload(req);
+    upload = await coverImageUpload(req, res);
   }
 
   let podcast = await Podcast.findByIdAndUpdate(req.params.id, req.body, {
