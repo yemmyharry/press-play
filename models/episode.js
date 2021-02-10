@@ -19,8 +19,8 @@ const episodeSchema = new mongoose.Schema(
     },
     podcastId: mongoose.ObjectId,
     episodeAudioUrl: { type: String, required: true },
-    likesCount: { type: Number, default: 0 },
-    playsCount: { type: Number, default: 0 },
+    likesCount: { type: Number, default: 0, min: 0 },
+    playsCount: { type: Number, default: 0, min: 0 },
     cloudinary: Object,
   },
   { timestamps: true }
