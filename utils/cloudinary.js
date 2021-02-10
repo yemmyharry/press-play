@@ -14,7 +14,7 @@ cloudinary.config({
   api_secret: CLOUDINARY_API_SECRET,
 });
 
-async function requireCoverImage(req) {
+async function requireCoverImage(req, res) {
   if (!req.file)
     return res.status(400).send({
       status: false,
@@ -23,7 +23,7 @@ async function requireCoverImage(req) {
     });
 }
 
-async function requireAudio(req) {
+async function requireAudio(req, res) {
   if (!req.file)
     return res.status(400).send({
       status: false,
@@ -31,8 +31,8 @@ async function requireAudio(req) {
       data: null,
     });
 }
-async function coverImageUpload(req) {
-  requireCoverImage(req);
+async function coverImageUpload(req, res) {
+  requireCoverImage(req, res);
 
   const uploadResult = await cloudinary.uploader.upload(req.file.path, {
     resource_type: "image",
@@ -52,8 +52,8 @@ async function deleteFile(path, resource_type) {
   return deleteResult;
 }
 
-async function audioUpload(req) {
-  requireAudio(req);
+async function audioUpload(req, res) {
+  requireAudio(req, res);
 
   const uploadResult = await cloudinary.uploader.upload(req.file.path, {
     resource_type: "video",
