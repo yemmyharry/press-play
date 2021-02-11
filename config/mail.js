@@ -18,7 +18,8 @@ const mailGenerator = new Mailgen({
   theme: 'default',
   product: {
     name: 'Press Play',
-    link: APP_URL
+    link: APP_URL,
+    logo: 'https://i.ibb.co/N2ffWPS/Layer-2.png'
   }
 });
 
@@ -31,6 +32,7 @@ exports.sendPasswordResetMail = async (user) => {
       action: {
         instructions: 'To reset your password, click on the link below:',
         button: {
+          color: '#E2605B',
           text: 'Reset password',
           link: `${base}/user/password-reset?token=${user.token}`
         }
