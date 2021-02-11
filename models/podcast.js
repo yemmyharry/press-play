@@ -54,17 +54,24 @@ podcastSchema.statics.getAllPodcastData = async function (userId) {
   for await (let podcast of this.find({ userId })
     .select("-__v -cloudinary")
     .lean()) {
-    const episodes = await Episode.find({ podcastId: podcast._id }).select(
-      "-cloudinary"
-    );
+    const episodes = await Episode.find({ podcastId: podcast._id })
+      .select("-cloudinary")
+      .lean();
+    for (let episode of episodes) {
+      episode.date = formattedDate(episode.createdAt);
+    }
     podcast.episodes = episodes;
+    podcast.date = formattedDate(podcast.createdAt);
     podcasts.push(podcast);
   }
   return podcasts;
 };
 
 podcastSchema.statics.search = function (title) {
-  return this.find({ title: { $regex: title, $options: "i" }, episodeCount: { $gt: 0 } });
+  return this.find({
+    title: { $regex: title, $options: "i" },
+    episodeCount: { $gt: 0 },
+  });
 };
 
 podcastSchema.statics.getOnePodcast = async function (podcastId) {

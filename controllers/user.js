@@ -158,7 +158,7 @@ exports.unsubscribeFromPodcast = async (req, res) => {
   const user = await User.unsubscribeFromPodcast(req.user.userId, podcastId);
 
   await Podcast.findOneAndUpdate(
-    { _id: podcastId, subscriptionsCount: { $gte: 0 } },
+    { _id: podcastId, subscriptionsCount: { $gt: 0 } },
     {
       $inc: { subscriptionsCount: -1 },
     }
@@ -211,7 +211,7 @@ exports.unlikeEpisode = async (req, res) => {
   const user = await User.unlikeEpisode(req.user.userId, episodeId);
 
   await Episode.findOneAndUpdate(
-    { _id: episodeId, likesCount: { $gte: 0 } },
+    { _id: episodeId, likesCount: { $gt: 0 } },
     {
       $inc: { likesCount: -1 },
     }
@@ -244,7 +244,7 @@ exports.userLogin = (req, res, next) => {
       }
       if (result) {
         const token = jwt.sign({ userId: user._id }, SECRET, {
-          expiresIn: "1d",
+          expiresIn: "1 day",
         });
         return res.status(200).send({
           status: true,
