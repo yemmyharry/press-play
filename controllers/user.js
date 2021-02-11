@@ -257,7 +257,7 @@ exports.userLogin = (req, res, next) => {
 };
 
 exports.activateAccount = (req, res) => {
-  const { token } = req.body;
+  const { token } = req.query;
   if (token) {
     jwt.verify(token, ACCOUNT_ACTIVATE, (err, decodedToken) => {
       if (err) {
