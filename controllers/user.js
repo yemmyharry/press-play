@@ -66,7 +66,7 @@ exports.userSignup = (req, res, next) => {
       const response = {
         body: {
           name: firstName,
-          intro: "Account Activate Link",
+          intro: "Account Activation Link",
           action: {
             instructions: "To activate your account, click on the link below:",
             button: {

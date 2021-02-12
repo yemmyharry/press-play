@@ -37,7 +37,7 @@ exports.sendPasswordResetMail = async (user) => {
           link: `${base}/user/password-reset?token=${user.token}`
         }
       },
-      outro: 'Do not share this link with anyone. Except if the person is helping to reset your password'
+      outro: 'Do not share this link with anyone. Except if the person is helping to reset your password.'
     }
   };
 
