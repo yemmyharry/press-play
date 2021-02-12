@@ -137,11 +137,13 @@ exports.subscribeToPodcast = async (req, res) => {
       message: "User is already subscribed",
       data: null,
     });
-  const user = await User.subscribeToPodcast(req.user.userId, podcastId);
-
-  await Podcast.findByIdAndUpdate(podcastId, {
+    
+  const podcastInDB = await Podcast.findByIdAndUpdate(podcastId, {
     $inc: { subscriptionsCount: +1 },
   });
+  if(!podcastInDB) return res.send({status: false, message: "Invalid Podcast", data: null})
+
+  const user = await User.subscribeToPodcast(req.user.userId, podcastId);
 
   res.send({ status: true, message: null, data: user });
 };

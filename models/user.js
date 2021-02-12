@@ -96,8 +96,9 @@ userSchema.statics.getSubscriptions = async function (Podcast, userId) {
   let podcasts = [];
   for await (let podcastId of podcastIds) {
     const podcast = await Podcast.findById(podcastId)
-      .select("-__v -cloudinary")
-      .lean();
+    .select("-__v -cloudinary")
+    .lean();
+    if (!podcast) continue 
 
     podcast.date = formattedDate(podcast.createdAt);
 
