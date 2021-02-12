@@ -218,7 +218,10 @@ exports.likeEpisode = async (req, res) => {
 
 exports.unlikeEpisode = async (req, res) => {
   const episodeId = req.params.id;
-  const haslikedEpisode = await User.haslikedEpisode(episodeId);
+  const haslikedEpisode = await User.haslikedEpisode(
+    req.user.userId,
+    episodeId
+  );
   if (!haslikedEpisode)
     return res.send({
       status: false,
