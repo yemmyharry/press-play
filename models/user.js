@@ -57,7 +57,6 @@ userSchema.statics.isSubscribed = function (userId, podcastId) {
 };
 
 userSchema.statics.subscribeToPodcast = function (userId, podcastId) {
-  console.log(userId)
   return this.findByIdAndUpdate(
     { _id: userId },
     { $push: { subscribedPodcasts: podcastId } },
@@ -96,7 +95,6 @@ userSchema.statics.getLikedEpisodes = async function (userId) {
 
 userSchema.statics.getSubscriptions = async function (Podcast, userId) {
   const user = await this.findById(userId);
-  console.log(user);
   const podcastIds = user.subscribedPodcasts;
   let podcasts = [];
   for await (let podcastId of podcastIds) {
@@ -115,7 +113,7 @@ userSchema.statics.getSubscriptions = async function (Podcast, userId) {
 
 userSchema.statics.likeEpisode = function (userId, podcastId) {
   return this.findByIdAndUpdate(
-    userId,
+    {_id: userId},
     { $push: { likedEpisodes: podcastId } },
     { new: true }
   );
@@ -123,7 +121,7 @@ userSchema.statics.likeEpisode = function (userId, podcastId) {
 
 userSchema.statics.unlikeEpisode = function (userId, podcastId) {
   return this.findByIdAndUpdate(
-    userId,
+    {_id: userId},
     { $pull: { likedEpisodes: podcastId } },
     { new: true }
   );
