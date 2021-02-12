@@ -35,8 +35,7 @@ const mailGenerator = new Mailgen({
   product: {
     name: "Press Play",
     link: APP_URL,
-    logo: 'https://i.ibb.co/N2ffWPS/Layer-2.png'
-
+    logo: "https://i.ibb.co/N2ffWPS/Layer-2.png",
   },
 });
 
@@ -71,7 +70,7 @@ exports.userSignup = (req, res, next) => {
           action: {
             instructions: "To activate your account, click on the link below:",
             button: {
-              color: '#E2605B',
+              color: "#E2605B",
               text: "Activate Account",
               link: `${baseUrl}/api/users/activate-account?token=${token}`,
             },
@@ -144,7 +143,8 @@ exports.subscribeToPodcast = async (req, res) => {
   const podcastInDB = await Podcast.findByIdAndUpdate(podcastId, {
     $inc: { subscriptionsCount: +1 },
   });
-  if(!podcastInDB) return res.send({status: false, message: "Invalid Podcast", data: null})
+  if (!podcastInDB)
+    return res.send({ status: false, message: "Invalid Podcast", data: null });
 
   const user = await User.subscribeToPodcast(req.user.userId, podcastId);
 
@@ -161,23 +161,28 @@ exports.unsubscribeFromPodcast = async (req, res) => {
       data: null,
     });
   const podcastInDB = await Podcast.findOneAndUpdate(
-      { _id: podcastId, subscriptionsCount: { $gt: 0 } },
-      {
-        $inc: { subscriptionsCount: -1 },
-      }
-    );
+    { _id: podcastId, subscriptionsCount: { $gt: 0 } },
+    {
+      $inc: { subscriptionsCount: -1 },
+    }
+  );
 
-  if(!podcastInDB) return res.send({status: false, message: "Invalid Episode", data: null})
-  
+  if (!podcastInDB)
+    return res.send({ status: false, message: "Invalid Episode", data: null });
+
   const user = await User.unsubscribeFromPodcast(req.user.userId, podcastId);
-
 
   res.send({ status: true, message: null, data: user });
 };
 
 exports.getLikedEpisodes = async (req, res) => {
   const likedEpisodes = await User.getLikedEpisodes(req.user.userId);
-
+  if (likedEpisodes.message)
+    return res.send({
+      status: false,
+      message: likedEpisodes.message,
+      data: null,
+    });
   res.send({ status: true, message: null, data: likedEpisodes });
 };
 
@@ -189,7 +194,10 @@ exports.getSubscriptions = async (req, res) => {
 
 exports.likeEpisode = async (req, res) => {
   const episodeId = req.params.id;
-  const haslikedEpisode = await User.haslikedEpisode(req.user.userId, episodeId);
+  const haslikedEpisode = await User.haslikedEpisode(
+    req.user.userId,
+    episodeId
+  );
   if (haslikedEpisode)
     return res.send({
       status: false,
@@ -200,10 +208,10 @@ exports.likeEpisode = async (req, res) => {
     $inc: { likesCount: +1 },
   });
 
-  if(!episodeInDB) return res.send({status: false, message: "Invalid Episode", data: null})
+  if (!episodeInDB)
+    return res.send({ status: false, message: "Invalid Episode", data: null });
 
   const user = await User.likeEpisode(req.user.userId, episodeId);
-
 
   res.send({ status: true, message: null, data: user });
 };

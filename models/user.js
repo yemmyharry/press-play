@@ -78,6 +78,7 @@ userSchema.statics.haslikedEpisode = function (userId, podcastId) {
 
 userSchema.statics.getLikedEpisodes = async function (userId) {
   const user = await this.findById(userId);
+  if (!user) return { status: false, message: "Invalid User" };
   const episodeIds = user.likedEpisodes;
   let episodes = [];
   for await (let episodeId of episodeIds) {
@@ -113,7 +114,7 @@ userSchema.statics.getSubscriptions = async function (Podcast, userId) {
 
 userSchema.statics.likeEpisode = function (userId, podcastId) {
   return this.findByIdAndUpdate(
-    {_id: userId},
+    { _id: userId },
     { $push: { likedEpisodes: podcastId } },
     { new: true }
   );
@@ -121,7 +122,7 @@ userSchema.statics.likeEpisode = function (userId, podcastId) {
 
 userSchema.statics.unlikeEpisode = function (userId, podcastId) {
   return this.findByIdAndUpdate(
-    {_id: userId},
+    { _id: userId },
     { $pull: { likedEpisodes: podcastId } },
     { new: true }
   );
