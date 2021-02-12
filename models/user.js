@@ -49,13 +49,17 @@ const userSchema = mongoose.Schema(
   { timestamps: true }
 );
 
-userSchema.statics.isSubscribed = function (podcastId) {
-  return this.findOne({ subscribedPodcasts: { $in: [podcastId] } });
+userSchema.statics.isSubscribed = function (userId, podcastId) {
+  return this.findOne({
+    _id: userId,
+    subscribedPodcasts: { $in: [podcastId] },
+  });
 };
 
 userSchema.statics.subscribeToPodcast = function (userId, podcastId) {
+  console.log(userId)
   return this.findByIdAndUpdate(
-    userId,
+    { _id: userId },
     { $push: { subscribedPodcasts: podcastId } },
     { new: true }
   );
@@ -63,14 +67,14 @@ userSchema.statics.subscribeToPodcast = function (userId, podcastId) {
 
 userSchema.statics.unsubscribeFromPodcast = function (userId, podcastId) {
   return this.findByIdAndUpdate(
-    userId,
+    { _id: userId },
     { $pull: { subscribedPodcasts: podcastId } },
     { new: true }
   );
 };
 
-userSchema.statics.haslikedEpisode = function (podcastId) {
-  return this.findOne({ likedEpisodes: { $in: [podcastId] } });
+userSchema.statics.haslikedEpisode = function (userId, podcastId) {
+  return this.findOne({ _id: userId, likedEpisodes: { $in: [podcastId] } });
 };
 
 userSchema.statics.getLikedEpisodes = async function (userId) {
@@ -92,13 +96,14 @@ userSchema.statics.getLikedEpisodes = async function (userId) {
 
 userSchema.statics.getSubscriptions = async function (Podcast, userId) {
   const user = await this.findById(userId);
+  console.log(user);
   const podcastIds = user.subscribedPodcasts;
   let podcasts = [];
   for await (let podcastId of podcastIds) {
     const podcast = await Podcast.findById(podcastId)
-    .select("-__v -cloudinary")
-    .lean();
-    if (!podcast) continue 
+      .select("-__v -cloudinary")
+      .lean();
+    if (!podcast) continue;
 
     podcast.date = formattedDate(podcast.createdAt);
 

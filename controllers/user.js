@@ -133,14 +133,14 @@ exports.getLoggedInUser = async (req, res, next) => {
 
 exports.subscribeToPodcast = async (req, res) => {
   const podcastId = req.params.id;
-  const isSubscribed = await User.isSubscribed(podcastId);
+  const isSubscribed = await User.isSubscribed(req.user.userId, podcastId);
   if (isSubscribed)
     return res.send({
       status: false,
       message: "User is already subscribed",
       data: null,
     });
-    
+
   const podcastInDB = await Podcast.findByIdAndUpdate(podcastId, {
     $inc: { subscriptionsCount: +1 },
   });
@@ -153,21 +153,24 @@ exports.subscribeToPodcast = async (req, res) => {
 
 exports.unsubscribeFromPodcast = async (req, res) => {
   const podcastId = req.params.id;
-  const isSubscribed = await User.isSubscribed(podcastId);
+  const isSubscribed = await User.isSubscribed(req.user.userId, podcastId);
   if (!isSubscribed)
     return res.send({
       status: false,
       message: "User is not subscribed to this podcast",
       data: null,
     });
+  const podcastInDB = await Podcast.findOneAndUpdate(
+      { _id: podcastId, subscriptionsCount: { $gt: 0 } },
+      {
+        $inc: { subscriptionsCount: -1 },
+      }
+    );
+
+  if(!podcastInDB) return res.send({status: false, message: "Invalid Episode", data: null})
+  
   const user = await User.unsubscribeFromPodcast(req.user.userId, podcastId);
 
-  await Podcast.findOneAndUpdate(
-    { _id: podcastId, subscriptionsCount: { $gt: 0 } },
-    {
-      $inc: { subscriptionsCount: -1 },
-    }
-  );
 
   res.send({ status: true, message: null, data: user });
 };
@@ -186,19 +189,21 @@ exports.getSubscriptions = async (req, res) => {
 
 exports.likeEpisode = async (req, res) => {
   const episodeId = req.params.id;
-  const haslikedEpisode = await User.haslikedEpisode(episodeId);
+  const haslikedEpisode = await User.haslikedEpisode(req.user.userId, episodeId);
   if (haslikedEpisode)
     return res.send({
       status: false,
       message: "User has already liked this Episode",
       data: null,
     });
+  const episodeInDB = await Episode.findByIdAndUpdate(episodeId, {
+    $inc: { likesCount: +1 },
+  });
+
+  if(!episodeInDB) return res.send({status: false, message: "Invalid Episode", data: null})
 
   const user = await User.likeEpisode(req.user.userId, episodeId);
 
-  await Episode.findByIdAndUpdate(episodeId, {
-    $inc: { likesCount: +1 },
-  });
 
   res.send({ status: true, message: null, data: user });
 };
