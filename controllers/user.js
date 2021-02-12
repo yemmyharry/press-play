@@ -35,6 +35,8 @@ const mailGenerator = new Mailgen({
   product: {
     name: "Press Play",
     link: APP_URL,
+    logo: 'https://i.ibb.co/N2ffWPS/Layer-2.png'
+
   },
 });
 
@@ -69,6 +71,7 @@ exports.userSignup = (req, res, next) => {
           action: {
             instructions: "To activate your account, click on the link below:",
             button: {
+              color: '#E2605B',
               text: "Activate Account",
               link: `${baseUrl}/api/users/activate-account?token=${token}`,
             },
