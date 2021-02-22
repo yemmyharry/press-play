@@ -1,12 +1,12 @@
 ## Press Play Podcast 
 <br>
-<p> This is a web API for the press play podcast.</p>
-
-This is the official API for the Press Play App
-Hosted at   
+<p> This is the official API for the Press Play App </p>    
+  
+Hosted at:    
+https://press-play-test.herokuapp.com
 
 First of all,  
-If you're reading this, please star this repo. I wanna be famous🥺  
+If you're reading this, please star this repo. we wanna be famous🥺  
 Anyway...  
 
 ## How to get started:
