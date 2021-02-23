@@ -27,5 +27,6 @@ https://press-play-api.herokuapp.com/
 
 ## Comments:
 No testing...   
-I know 😓 it sucks, We built this when Chidi was writing everyday exams and Yemi was sick
+I know 😓 it sucks,      
+We built this when Chidi was writing everyday exams and Yemi was sick     
 But watch this repo and pretty soon it'll be covered in testing 😉
