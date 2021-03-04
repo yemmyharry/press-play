@@ -44,7 +44,7 @@ exports.sendPasswordResetMail = async (user) => {
   const mail = mailGenerator.generate(response);
 
   const message = {
-    from: `Press Play <o.arigbanla@genesystechhub.com>`,
+    from: `Press Play <celltekhealthcaremedicalcenter@gmail.com>`,
     to: user.email,
     subject: 'Reset your password',
     html: mail

@@ -82,7 +82,7 @@ exports.userSignup = (req, res, next) => {
       const mail = mailGenerator.generate(response);
 
       const message = {
-        from: `Press Play <o.arigbanla@genesystechhub.com>`,
+        from: `Press Play <celltekhealthcaremedicalcenter@gmail.com>`,
         to: email,
         subject: "Activate your account",
         html: mail,
