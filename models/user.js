@@ -2,6 +2,7 @@ const Joi = require("joi");
 const mongoose = require("mongoose");
 const { formattedDate } = require("../utils/helpers");
 const { Episode } = require("./episode");
+const bcrypt = require("bcrypt");
 
 const userSchema = mongoose.Schema(
   {
@@ -81,7 +82,7 @@ userSchema.statics.getLikedEpisodes = async function (userId) {
   if (!user) return { status: false, message: "Invalid User" };
   const episodeIds = user.likedEpisodes;
   let episodes = [];
-  for await (let episodeId of episodeIds) {
+  for (let episodeId of episodeIds) {
     const episode = await Episode.findById(episodeId)
       .select("-__v -cloudinary")
       .lean();
@@ -98,7 +99,7 @@ userSchema.statics.getSubscriptions = async function (Podcast, userId) {
   const user = await this.findById(userId);
   const podcastIds = user.subscribedPodcasts;
   let podcasts = [];
-  for await (let podcastId of podcastIds) {
+  for (let podcastId of podcastIds) {
     const podcast = await Podcast.findById(podcastId)
       .select("-__v -cloudinary")
       .lean();
@@ -162,6 +163,16 @@ function validateLogin(req) {
 
   return result;
 }
+
+userSchema.pre("findOneAndUpdate", async function (next) {
+  const data = this || this.update;
+  if (data.password !== "" && data.password !== undefined) {
+    const salt = await bcrypt.genSalt(10);
+    const hashed = await bcrypt.hash(data.password, salt);
+    data.password = hashed;
+  }
+  next();
+});
 
 exports.User = User;
 
