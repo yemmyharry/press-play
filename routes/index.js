@@ -13,7 +13,7 @@ module.exports = function (app) {
   app.use(cors());
 
   app.get("/", (req, res, next) => {
-    res.send(`Welcome to Press Play API`);
+    res.send(`Welcome to Press Play API. Documentation available at <a href="https://documenter.getpostman.com/view/9823092/TW74i51A">https://documenter.getpostman.com/view/9823092/TW74i51A.</a>`);
   });
 
   app.use("/api/episodes", episodes); // use the episodes router;
