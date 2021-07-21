@@ -27,14 +27,15 @@ exports.transporter = transporter = nodemailer.createTransport({
   },
 });
 
-exports.mailGenerator = mailGenerator = new Mailgen({
-  theme: "default",
-  product: {
-    name: "Press Play",
-    link: `${APP_URL}`,
-    logo: "https://i.ibb.co/N2ffWPS/Layer-2.png",
-  },
-});
+exports.mailGenerator = mailGenerator = (origin) =>
+  new Mailgen({
+    theme: "default",
+    product: {
+      name: "Press Play",
+      link: `${origin}`,
+      logo: "https://i.ibb.co/N2ffWPS/Layer-2.png",
+    },
+  });
 
 exports.sendActivationMail = async (user) => {
   const mail = {
@@ -52,7 +53,7 @@ exports.sendActivationMail = async (user) => {
       outro: "Do not share this link with anyone.",
     },
   };
-  sendEmail(user.email, "Activate your account", mail);
+  sendEmail(user, "Activate your account", mail);
 };
 
 exports.sendPasswordResetMail = async (user) => {
@@ -72,11 +73,15 @@ exports.sendPasswordResetMail = async (user) => {
         "Please ignore this email if you did not request a password reset.",
     },
   };
-  await sendEmail(user.email, "Reset your password", mail);
+  await sendEmail(user, "Reset your password", mail);
 };
 
 let sendEmail = (to, subject, mail) => {
-  html = mailGenerator.generate(mail);
+  const origin = to.origin || APP_URL;
+  to = to.email || to;
+
+  html = mailGenerator(origin).generate(mail);
+
   const message = {
     from: `Press Play <${EMAILER}>`,
     to,
